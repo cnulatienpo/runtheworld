@@ -1,0 +1,49 @@
+
+import requests
+import re
+
+# User variables (fill these in)
+GITHUB_TOKEN = "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"  # <-- Paste your token here
+REPO = "cnulatienpo/runtheworld"
+
+# Tasklist file location
+TASKLIST_FILE = ".github/workflows/urban-hallucination-overlay-tasklist (1).md"
+
+# Extract tasks from the file
+def parse_tasks(file_path):
+    with open(file_path, encoding='utf-8') as f:
+        content = f.read()
+    # Regex to extract each task block
+    pattern = r'### (.*?)\n\*\*Labels:\*\*(.*?)---'
+    matches = re.findall(pattern, content, re.DOTALL)
+    tasks = []
+    for title, body in matches:
+        labels = re.findall(r'`([^`]+)`', body)
+        desc = re.sub(r'^\s*- ', '', body.split('Labels:')[-1], flags=re.MULTILINE)
+        tasks.append({
+            "title": title.strip(),
+            "body": desc.strip(),
+            "labels": labels
+        })
+    return tasks
+
+# Create GitHub Issue
+def create_issue(task):
+    url = f"https://api.github.com/repos/{REPO}/issues"
+    headers = {
+        "Authorization": f"token {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github+json"
+    }
+    data = {
+        "title": task["title"],
+        "body": task["body"],
+        "labels": task["labels"]
+    }
+    response = requests.post(url, json=data, headers=headers)
+    print(f"Created: {task['title']} - Status: {response.status_code}")
+
+if __name__ == "__main__":
+    tasks = parse_tasks(TASKLIST_FILE)
+    print(f"Found {len(tasks)} tasks.")
+    for t in tasks:
+        create_issue(t)
