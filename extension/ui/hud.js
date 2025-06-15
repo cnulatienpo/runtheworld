@@ -8,6 +8,9 @@ window.hallucinationsEnabled = hallucinationsEnabled;
 let sessionMood = localStorage.getItem('sessionMood') || 'medium';
 window.sessionMood = sessionMood;
 
+// Restore effect count from storage or start at 0
+let effectCount = Number(localStorage.getItem('effectCount') || 0);
+
 // 1. Create main HUD button and panel
 const hudIcon = document.createElement('div');
 hudIcon.id = 'uh-hud-icon';
@@ -126,6 +129,21 @@ toggleDiv.innerHTML = `
 
 hudPanel.appendChild(toggleDiv);
 
+// Display effect counter in HUD
+const effectCountDiv = document.createElement('div');
+effectCountDiv.id = 'uh-hud-effect-count';
+effectCountDiv.style.fontWeight = 'bold';
+effectCountDiv.style.fontSize = '1.1em';
+effectCountDiv.style.margin = '10px 0';
+effectCountDiv.innerHTML = `Effects Triggered: <span id="uh-hud-effect-count-val">${effectCount}</span>`;
+hudPanel.appendChild(effectCountDiv);
+
+function updateEffectCountHUD(count) {
+  const el = document.getElementById('uh-hud-effect-count-val');
+  if (el) el.textContent = count;
+  localStorage.setItem('effectCount', count);
+}
+
 function setHallucinationToggleUI(enabled) {
   const btn = document.getElementById('uh-hud-toggle-btn');
   if (!btn) return;
@@ -197,7 +215,14 @@ function triggerEffect(...args) {
     // ... existing effect code here ...
     // Mood can influence intensity, visuals, etc.
     // sessionMood will be 'low', 'medium', or 'high'
+    effectCount++;
+    updateEffectCountHUD(effectCount);
   }
+}
+
+function resetEffectCount() {
+  effectCount = 0;
+  updateEffectCountHUD(effectCount);
 }
 
 // 8. Exported functions (to connect data later)
@@ -217,4 +242,12 @@ window.uhHUD = {
   },
   getMood: () => sessionMood,
   onMoodChange: cb => window.__uhHUDMoodCB = cb,
+  resetEffectCount,
 };
+
+// Sync counter on startup
+updateEffectCountHUD(effectCount);
+
+// Export triggerEffect and reset function to global scope if needed
+window.triggerEffect = triggerEffect;
+window.resetEffectCount = resetEffectCount;
