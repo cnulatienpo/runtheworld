@@ -98,6 +98,7 @@ moodDiv.innerHTML = `
     <option value="medium">Medium</option>
     <option value="high">High</option>
   </select>
+  <span id="uh-hud-mood-label" style="margin-left:10px;font-weight:bold;">Mood: ${sessionMood.charAt(0).toUpperCase() + sessionMood.slice(1)}</span>
 `;
 
 hudPanel.appendChild(moodDiv);
@@ -109,6 +110,8 @@ moodSelect.onchange = e => {
   sessionMood = e.target.value;
   window.sessionMood = sessionMood;
   localStorage.setItem('sessionMood', sessionMood);
+  document.getElementById('uh-hud-mood-label').textContent =
+    'Mood: ' + sessionMood.charAt(0).toUpperCase() + sessionMood.slice(1);
   if (typeof window.__uhHUDMoodCB === 'function') {
     window.__uhHUDMoodCB(sessionMood);
   }
@@ -157,13 +160,13 @@ const freqDiv = document.createElement('div');
 freqDiv.id = 'uh-hud-effect-frequency';
 freqDiv.style.margin = '12px 0';
 freqDiv.innerHTML = `
-  <label for="uh-hud-freq-select" style="font-weight:bold; margin-right:8px;">Effect Frequency:</label>
+  <label for="uh-hud-freq-select" style="font-weight:bold; margin-right:8px;">Intensity:</label>
   <select id="uh-hud-freq-select" style="padding:4px 8px; border-radius:8px;">
     <option value="chill">Chill</option>
     <option value="normal">Normal</option>
     <option value="intense">Intense</option>
   </select>
-  <span id="uh-hud-freq-label" style="margin-left:10px;font-weight:bold;">Frequency: ${effectFrequency.charAt(0).toUpperCase() + effectFrequency.slice(1)}</span>
+  <span id="uh-hud-freq-label" style="margin-left:10px;font-weight:bold;">Intensity: ${effectFrequency.charAt(0).toUpperCase() + effectFrequency.slice(1)}</span>
 `;
 hudPanel.appendChild(freqDiv);
 document.getElementById('uh-hud-freq-select').value = effectFrequency;
@@ -172,8 +175,11 @@ document.getElementById('uh-hud-freq-select').onchange = e => {
   window.effectFrequency = effectFrequency;
   localStorage.setItem('effectFrequency', effectFrequency);
   document.getElementById('uh-hud-freq-label').textContent =
-    'Frequency: ' + effectFrequency.charAt(0).toUpperCase() + effectFrequency.slice(1);
+    'Intensity: ' + effectFrequency.charAt(0).toUpperCase() + effectFrequency.slice(1);
   restartEffectInterval();
+  if (typeof window.__uhHUDFreqCB === 'function') {
+    window.__uhHUDFreqCB(effectFrequency);
+  }
 };
 
 function updateEffectCountHUD(count) {
@@ -320,9 +326,22 @@ window.uhHUD = {
     sessionMood = mood;
     window.sessionMood = mood;
     localStorage.setItem('sessionMood', mood);
+    document.getElementById('uh-hud-mood-label').textContent =
+      'Mood: ' + mood.charAt(0).toUpperCase() + mood.slice(1);
   },
   getMood: () => sessionMood,
   onMoodChange: cb => window.__uhHUDMoodCB = cb,
+  setEffectFrequency: freq => {
+    document.getElementById('uh-hud-freq-select').value = freq;
+    effectFrequency = freq;
+    window.effectFrequency = freq;
+    localStorage.setItem('effectFrequency', freq);
+    document.getElementById('uh-hud-freq-label').textContent =
+      'Intensity: ' + freq.charAt(0).toUpperCase() + freq.slice(1);
+    restartEffectInterval();
+  },
+  getEffectFrequency: () => effectFrequency,
+  onEffectFrequencyChange: cb => window.__uhHUDFreqCB = cb,
   resetEffectCount,
   resetSessionStartTime,
 };
