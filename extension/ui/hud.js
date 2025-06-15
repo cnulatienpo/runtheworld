@@ -46,6 +46,10 @@ hudPanel.innerHTML = `
   </div>
   <div><b>Input:</b> <span id="uh-hud-input">Keyboard</span></div>
   <div><b>Time:</b> <span id="uh-hud-timer">00:00:00</span></div>
+  <div id="uh-hud-bpm">
+    <b>BPM:</b> <span id="uh-hud-bpm-val">120</span><br>
+    <b>Energy:</b> <span id="uh-hud-energy-val">Medium</span>
+  </div>
   <div>
     <b>Hallucination Pack:</b>
     <select id="uh-hud-pack">
@@ -79,6 +83,22 @@ setInterval(() => {
   let s = String(sessionSeconds % 60).padStart(2, '0');
   document.getElementById('uh-hud-timer').textContent = `${h}:${m}:${s}`;
 }, 1000);
+
+// BPM / Energy logic
+function getEnergy(bpm) {
+  if (bpm < 100) return 'Low';
+  if (bpm < 130) return 'Medium';
+  return 'High';
+}
+
+function updateBPM() {
+  const bpm = Math.floor(Math.random() * (160 - 80 + 1)) + 80;
+  document.getElementById('uh-hud-bpm-val').textContent = bpm;
+  document.getElementById('uh-hud-energy-val').textContent = getEnergy(bpm);
+}
+
+updateBPM();
+setInterval(updateBPM, 3000);
 
 // 8. Exported functions (to connect data later)
 // Use window.uhHUD.setStepCount(n), setInputSource('SlimeVR'), etc.
