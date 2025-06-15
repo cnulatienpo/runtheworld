@@ -303,6 +303,7 @@ function resetSessionStartTime() {
   sessionStartTime = Date.now();
   localStorage.setItem('sessionStartTime', sessionStartTime);
   updateElapsedTimeDisplay(0);
+  resetEffectCount();
 }
 
 // 8. Exported functions (to connect data later)
