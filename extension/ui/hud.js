@@ -4,6 +4,10 @@
 let hallucinationsEnabled = JSON.parse(localStorage.getItem('hallucinationsEnabled') ?? 'true');
 window.hallucinationsEnabled = hallucinationsEnabled;
 
+// 0b. Restore session mood from localStorage or set default
+let sessionMood = localStorage.getItem('sessionMood') || 'medium';
+window.sessionMood = sessionMood;
+
 // 1. Create main HUD button and panel
 const hudIcon = document.createElement('div');
 hudIcon.id = 'uh-hud-icon';
@@ -64,6 +68,34 @@ hudPanel.innerHTML = `
     </select>
   </div>
 `;
+
+// Add Mood dropdown to HUD
+const moodDiv = document.createElement('div');
+moodDiv.id = 'uh-hud-mood-dropdown';
+moodDiv.style.margin = '12px 0';
+
+moodDiv.innerHTML = `
+  <label for="uh-hud-mood-select" style="font-weight:bold; margin-right:8px;">Mood:</label>
+  <select id="uh-hud-mood-select" style="padding:4px 8px; border-radius:8px;">
+    <option value="low">Low</option>
+    <option value="medium">Medium</option>
+    <option value="high">High</option>
+  </select>
+`;
+
+hudPanel.appendChild(moodDiv);
+
+// Set initial mood and handler
+const moodSelect = document.getElementById('uh-hud-mood-select');
+moodSelect.value = sessionMood;
+moodSelect.onchange = e => {
+  sessionMood = e.target.value;
+  window.sessionMood = sessionMood;
+  localStorage.setItem('sessionMood', sessionMood);
+  if (typeof window.__uhHUDMoodCB === 'function') {
+    window.__uhHUDMoodCB(sessionMood);
+  }
+};
 
 // Create the hallucination mode label
 const modeDiv = document.createElement('div');
@@ -159,6 +191,8 @@ setInterval(updateBPM, 3000);
 function triggerEffect(...args) {
   if (hallucinationsEnabled) {
     // ... existing effect code here ...
+    // Mood can influence intensity, visuals, etc.
+    // sessionMood will be 'low', 'medium', or 'high'
   }
 }
 
@@ -171,4 +205,12 @@ window.uhHUD = {
   getPlaylist: () => document.getElementById('uh-hud-playlist').value,
   onPackChange: cb => document.getElementById('uh-hud-pack').onchange = e => cb(e.target.value),
   setHallucinationMode: enabled => updateHallucinationMode(enabled),
+  setMood: mood => {
+    document.getElementById('uh-hud-mood-select').value = mood;
+    sessionMood = mood;
+    window.sessionMood = mood;
+    localStorage.setItem('sessionMood', mood);
+  },
+  getMood: () => sessionMood,
+  onMoodChange: cb => window.__uhHUDMoodCB = cb,
 };
