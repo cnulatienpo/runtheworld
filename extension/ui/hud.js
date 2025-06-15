@@ -1,5 +1,9 @@
 // HUD Panel for Urban Hallucination Overlay
 
+// 0. Restore hallucination state from localStorage
+let hallucinationsEnabled = JSON.parse(localStorage.getItem('hallucinationsEnabled') ?? 'true');
+window.hallucinationsEnabled = hallucinationsEnabled;
+
 // 1. Create main HUD button and panel
 const hudIcon = document.createElement('div');
 hudIcon.id = 'uh-hud-icon';
@@ -69,6 +73,38 @@ modeDiv.style.fontSize = '1.3em';
 modeDiv.style.margin = '12px 0';
 hudPanel.appendChild(modeDiv);
 
+// Add hallucination toggle switch
+const toggleDiv = document.createElement('div');
+toggleDiv.id = 'uh-hud-hallucination-toggle';
+toggleDiv.style.display = 'flex';
+toggleDiv.style.alignItems = 'center';
+toggleDiv.style.gap = '12px';
+toggleDiv.style.margin = '12px 0';
+
+toggleDiv.innerHTML = `
+  <label style="font-weight:bold;">Hallucinations:</label>
+  <button id="uh-hud-toggle-btn" style="font-weight:bold; font-size:1.1em; border-radius:20px; border:none; padding:5px 16px; background:${hallucinationsEnabled ? '#24e052' : '#b8b8b8'}; color:#222;">
+    ${hallucinationsEnabled ? 'ON' : 'OFF'}
+  </button>
+`;
+
+hudPanel.appendChild(toggleDiv);
+
+function setHallucinationToggleUI(enabled) {
+  const btn = document.getElementById('uh-hud-toggle-btn');
+  if (!btn) return;
+  btn.textContent = enabled ? 'ON' : 'OFF';
+  btn.style.background = enabled ? '#24e052' : '#b8b8b8';
+}
+
+document.getElementById('uh-hud-toggle-btn').onclick = () => {
+  hallucinationsEnabled = !hallucinationsEnabled;
+  window.hallucinationsEnabled = hallucinationsEnabled;
+  localStorage.setItem('hallucinationsEnabled', JSON.stringify(hallucinationsEnabled));
+  setHallucinationToggleUI(hallucinationsEnabled);
+  updateHallucinationMode(hallucinationsEnabled);
+};
+
 function updateHallucinationMode(enabled) {
   const statusSpan = document.getElementById('uh-hud-mode-status');
   if (!statusSpan) return;
@@ -87,7 +123,8 @@ document.body.appendChild(hudIcon);
 document.body.appendChild(hudPanel);
 
 // Initialize hallucination mode display
-updateHallucinationMode(window.hallucinationsEnabled ?? false);
+setHallucinationToggleUI(hallucinationsEnabled);
+updateHallucinationMode(hallucinationsEnabled);
 
 // 6. (Optional) Animate icon on hover
 hudIcon.onmouseenter = () => hudIcon.style.background = 'rgba(50,90,200,0.75)';
@@ -118,6 +155,12 @@ function updateBPM() {
 
 updateBPM();
 setInterval(updateBPM, 3000);
+
+function triggerEffect(...args) {
+  if (hallucinationsEnabled) {
+    // ... existing effect code here ...
+  }
+}
 
 // 8. Exported functions (to connect data later)
 // Use window.uhHUD.setStepCount(n), setInputSource('SlimeVR'), etc.
