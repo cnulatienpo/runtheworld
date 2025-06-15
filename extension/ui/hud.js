@@ -11,6 +11,15 @@ window.sessionMood = sessionMood;
 // Restore effect count from storage or start at 0
 let effectCount = Number(localStorage.getItem('effectCount') || 0);
 
+// Frequency presets and restore setting
+const frequencyPresets = {
+  chill: 15000,
+  normal: 10000,
+  intense: () => Math.floor(Math.random() * 2000) + 4000,
+};
+let effectFrequency = localStorage.getItem('effectFrequency') || 'normal';
+window.effectFrequency = effectFrequency;
+
 // 1. Create main HUD button and panel
 const hudIcon = document.createElement('div');
 hudIcon.id = 'uh-hud-icon';
@@ -138,6 +147,30 @@ effectCountDiv.style.margin = '10px 0';
 effectCountDiv.innerHTML = `Effects Triggered: <span id="uh-hud-effect-count-val">${effectCount}</span>`;
 hudPanel.appendChild(effectCountDiv);
 
+// Add effect frequency dropdown
+const freqDiv = document.createElement('div');
+freqDiv.id = 'uh-hud-effect-frequency';
+freqDiv.style.margin = '12px 0';
+freqDiv.innerHTML = `
+  <label for="uh-hud-freq-select" style="font-weight:bold; margin-right:8px;">Effect Frequency:</label>
+  <select id="uh-hud-freq-select" style="padding:4px 8px; border-radius:8px;">
+    <option value="chill">Chill</option>
+    <option value="normal">Normal</option>
+    <option value="intense">Intense</option>
+  </select>
+  <span id="uh-hud-freq-label" style="margin-left:10px;font-weight:bold;">Frequency: ${effectFrequency.charAt(0).toUpperCase() + effectFrequency.slice(1)}</span>
+`;
+hudPanel.appendChild(freqDiv);
+document.getElementById('uh-hud-freq-select').value = effectFrequency;
+document.getElementById('uh-hud-freq-select').onchange = e => {
+  effectFrequency = e.target.value;
+  window.effectFrequency = effectFrequency;
+  localStorage.setItem('effectFrequency', effectFrequency);
+  document.getElementById('uh-hud-freq-label').textContent =
+    'Frequency: ' + effectFrequency.charAt(0).toUpperCase() + effectFrequency.slice(1);
+  restartEffectInterval();
+};
+
 function updateEffectCountHUD(count) {
   const el = document.getElementById('uh-hud-effect-count-val');
   if (el) el.textContent = count;
@@ -209,6 +242,30 @@ function updateBPM() {
 
 updateBPM();
 setInterval(updateBPM, 3000);
+
+// Effect interval logic
+let effectInterval = null;
+function startEffectInterval() {
+  clearEffectInterval();
+  let interval;
+  if (effectFrequency === 'intense') {
+    interval = frequencyPresets.intense();
+  } else {
+    interval = frequencyPresets[effectFrequency];
+  }
+  effectInterval = setTimeout(() => {
+    triggerEffect();
+    startEffectInterval();
+  }, interval);
+}
+function clearEffectInterval() {
+  if (effectInterval) clearTimeout(effectInterval);
+}
+function restartEffectInterval() {
+  startEffectInterval();
+}
+
+startEffectInterval();
 
 function triggerEffect(...args) {
   if (hallucinationsEnabled) {
