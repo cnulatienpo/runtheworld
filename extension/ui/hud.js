@@ -97,13 +97,17 @@ moodSelect.onchange = e => {
   }
 };
 
-// Create the hallucination mode label
-const modeDiv = document.createElement('div');
-modeDiv.id = 'uh-hud-hallucination-mode';
-modeDiv.innerHTML = `<b>Hallucination Mode: <span id="uh-hud-mode-status">OFF</span></b>`;
-modeDiv.style.fontSize = '1.3em';
-modeDiv.style.margin = '12px 0';
-hudPanel.appendChild(modeDiv);
+// Create and insert the hallucination mode status label
+const statusDiv = document.createElement('div');
+statusDiv.id = 'uh-hud-hallucination-status';
+statusDiv.style.fontWeight = 'bold';
+statusDiv.style.fontSize = '1.3em';
+statusDiv.style.margin = '12px 0';
+statusDiv.innerHTML = `
+  Hallucination Mode: <span id="uh-hud-mode-status" style="color:#c9302c;">OFF</span>
+`;
+
+hudPanel.appendChild(statusDiv);
 
 // Add hallucination toggle switch
 const toggleDiv = document.createElement('div');
@@ -141,7 +145,7 @@ function updateHallucinationMode(enabled) {
   const statusSpan = document.getElementById('uh-hud-mode-status');
   if (!statusSpan) return;
   statusSpan.textContent = enabled ? 'ON' : 'OFF';
-  statusSpan.style.color = enabled ? '#19e22e' : '#c9302c';
+  statusSpan.style.color = enabled ? '#24e052' : '#c9302c';
   statusSpan.style.fontWeight = 'bold';
 }
 
