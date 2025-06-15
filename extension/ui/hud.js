@@ -11,6 +11,11 @@ window.sessionMood = sessionMood;
 // Restore effect count from storage or start at 0
 let effectCount = Number(localStorage.getItem('effectCount') || 0);
 
+// Restore or initialize session start time
+let sessionStartTime = Number(localStorage.getItem('sessionStartTime') || Date.now());
+localStorage.setItem('sessionStartTime', sessionStartTime);
+window.sessionStartTime = sessionStartTime;
+
 // Frequency presets and restore setting
 const frequencyPresets = {
   chill: 15000,
@@ -65,7 +70,7 @@ hudPanel.innerHTML = `
     <input id="uh-hud-playlist" type="text" placeholder="Paste YouTube/Spotify link" style="width:180px;"/>
   </div>
   <div><b>Input:</b> <span id="uh-hud-input">Keyboard</span></div>
-  <div><b>Time:</b> <span id="uh-hud-timer">00:00:00</span></div>
+  <div><b>Session Time:</b> <span id="uh-hud-session-elapsed">00:00</span></div>
   <div id="uh-hud-bpm">
     <b>BPM:</b> <span id="uh-hud-bpm-val">120</span><br>
     <b>Energy:</b> <span id="uh-hud-energy-val">Medium</span>
@@ -217,15 +222,27 @@ updateHallucinationMode(hallucinationsEnabled);
 hudIcon.onmouseenter = () => hudIcon.style.background = 'rgba(50,90,200,0.75)';
 hudIcon.onmouseleave = () => hudIcon.style.background = 'rgba(30,30,40,0.8)';
 
-// 7. (Optional) Simple timer logic (replace this with your real session timer)
-let sessionSeconds = 0;
+// 7. Session timer logic
+function updateElapsedTimeDisplay(elapsed) {
+  let totalSeconds = Math.floor(elapsed / 1000);
+  let h = Math.floor(totalSeconds / 3600);
+  let m = Math.floor((totalSeconds % 3600) / 60);
+  let s = totalSeconds % 60;
+  let str =
+    h > 0
+      ? `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+      : `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  const el = document.getElementById('uh-hud-session-elapsed');
+  if (el) el.textContent = str;
+}
+
 setInterval(() => {
-  sessionSeconds++;
-  let h = String(Math.floor(sessionSeconds / 3600)).padStart(2, '0');
-  let m = String(Math.floor((sessionSeconds % 3600) / 60)).padStart(2, '0');
-  let s = String(sessionSeconds % 60).padStart(2, '0');
-  document.getElementById('uh-hud-timer').textContent = `${h}:${m}:${s}`;
+  const elapsed = Date.now() - sessionStartTime;
+  updateElapsedTimeDisplay(elapsed);
 }, 1000);
+
+// Show initial time on load
+updateElapsedTimeDisplay(Date.now() - sessionStartTime);
 
 // BPM / Energy logic
 function getEnergy(bpm) {
@@ -282,6 +299,12 @@ function resetEffectCount() {
   updateEffectCountHUD(effectCount);
 }
 
+function resetSessionStartTime() {
+  sessionStartTime = Date.now();
+  localStorage.setItem('sessionStartTime', sessionStartTime);
+  updateElapsedTimeDisplay(0);
+}
+
 // 8. Exported functions (to connect data later)
 // Use window.uhHUD.setStepCount(n), setInputSource('SlimeVR'), etc.
 window.uhHUD = {
@@ -300,6 +323,7 @@ window.uhHUD = {
   getMood: () => sessionMood,
   onMoodChange: cb => window.__uhHUDMoodCB = cb,
   resetEffectCount,
+  resetSessionStartTime,
 };
 
 // Sync counter on startup
@@ -308,3 +332,4 @@ updateEffectCountHUD(effectCount);
 // Export triggerEffect and reset function to global scope if needed
 window.triggerEffect = triggerEffect;
 window.resetEffectCount = resetEffectCount;
+window.resetSessionStartTime = resetSessionStartTime;
