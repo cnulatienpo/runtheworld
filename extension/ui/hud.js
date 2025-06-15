@@ -61,6 +61,22 @@ hudPanel.innerHTML = `
   </div>
 `;
 
+// Create the hallucination mode label
+const modeDiv = document.createElement('div');
+modeDiv.id = 'uh-hud-hallucination-mode';
+modeDiv.innerHTML = `<b>Hallucination Mode: <span id="uh-hud-mode-status">OFF</span></b>`;
+modeDiv.style.fontSize = '1.3em';
+modeDiv.style.margin = '12px 0';
+hudPanel.appendChild(modeDiv);
+
+function updateHallucinationMode(enabled) {
+  const statusSpan = document.getElementById('uh-hud-mode-status');
+  if (!statusSpan) return;
+  statusSpan.textContent = enabled ? 'ON' : 'OFF';
+  statusSpan.style.color = enabled ? '#19e22e' : '#c9302c';
+  statusSpan.style.fontWeight = 'bold';
+}
+
 // 4. Show/hide panel when HUD icon is clicked
 hudIcon.onclick = () => {
   hudPanel.style.display = (hudPanel.style.display === 'none') ? 'flex' : 'none';
@@ -69,6 +85,9 @@ hudIcon.onclick = () => {
 // 5. Add both to the document
 document.body.appendChild(hudIcon);
 document.body.appendChild(hudPanel);
+
+// Initialize hallucination mode display
+updateHallucinationMode(window.hallucinationsEnabled ?? false);
 
 // 6. (Optional) Animate icon on hover
 hudIcon.onmouseenter = () => hudIcon.style.background = 'rgba(50,90,200,0.75)';
@@ -108,4 +127,5 @@ window.uhHUD = {
   setPack: pack => document.getElementById('uh-hud-pack').value = pack,
   getPlaylist: () => document.getElementById('uh-hud-playlist').value,
   onPackChange: cb => document.getElementById('uh-hud-pack').onchange = e => cb(e.target.value),
+  setHallucinationMode: enabled => updateHallucinationMode(enabled),
 };
