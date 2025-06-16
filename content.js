@@ -776,3 +776,53 @@ function addJustLetMeRunToggle() {
 }
 
 addJustLetMeRunToggle();
+function addTagButtons(tags, onTagClick) {
+  let hud = document.getElementById('urban-hallucination-hud');
+  if (!hud) {
+    hud = document.createElement('div');
+    hud.id = 'urban-hallucination-hud';
+    hud.style.position = "fixed";
+    hud.style.top = "20px";
+    hud.style.right = "20px";
+    hud.style.background = "rgba(0,0,0,0.7)";
+    hud.style.color = "#fff";
+    hud.style.padding = "8px 18px";
+    hud.style.fontSize = "18px";
+    hud.style.zIndex = "999999";
+    hud.style.borderRadius = "8px";
+    document.body.appendChild(hud);
+  }
+
+  // Remove existing tag wrap if present
+  let tagWrap = document.getElementById('hud-tag-buttons');
+  if (tagWrap) tagWrap.remove();
+
+  tagWrap = document.createElement('div');
+  tagWrap.id = 'hud-tag-buttons';
+  tagWrap.style.marginTop = '12px';
+
+  tags.forEach(tag => {
+    const btn = document.createElement('button');
+    btn.textContent = tag;
+    btn.style.margin = "0 6px 6px 0";
+    btn.style.padding = "4px 14px";
+    btn.style.background = "#353535";
+    btn.style.color = "#fff";
+    btn.style.border = "none";
+    btn.style.borderRadius = "6px";
+    btn.style.fontSize = "16px";
+    btn.style.cursor = "pointer";
+    btn.addEventListener('click', () => onTagClick(tag));
+    tagWrap.appendChild(btn);
+  });
+
+  hud.appendChild(tagWrap);
+}
+
+addTagButtons(
+  ["Urban", "Nature", "Dreamcore", "Glide", "Ambient", "Rare"],
+  (tag) => {
+    console.log("Tag clicked:", tag);
+    // TODO: Filter playlists/assets/spawn effects based on tag
+  }
+);
