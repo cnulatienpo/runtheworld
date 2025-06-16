@@ -319,3 +319,62 @@ window.showDebugZones = showDebugZones;
 window.removeDebugZones = removeDebugZones;
 window.createZoneOverlay = createZoneOverlay;
 window.triggerZoneEffect = triggerZoneEffect;
+
+// --- WebSocket Step Listener ---
+let stepCount = 0;
+let inputSource = "WebSocket (Fake Server)";
+let socket;
+
+function updateInputSource(source) {
+  const label = document.getElementById('input-source-display');
+  if (label) label.innerText = `Input Source: ${source}`;
+}
+
+function updateStepCounter(count) {
+  const stepLabel = document.getElementById('step-counter');
+  if (stepLabel) stepLabel.innerText = `Steps: ${count}`;
+}
+
+function pickEffectForCurrentMood() {
+  const effects = moodEffectMap[sessionMood] || [];
+  return effects[Math.floor(Math.random() * effects.length)] || null;
+}
+
+function connectWebSocket() {
+  socket = new WebSocket("ws://localhost:6789");
+
+  socket.onopen = () => {
+    console.log("[RunTheWorld] Connected to step server.");
+    updateInputSource("WebSocket (Fake Server)");
+  };
+
+  socket.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.steps) {
+        stepCount += data.steps;
+        updateStepCounter(stepCount);
+        if (typeof triggerEffect === 'function') {
+          const eff = pickEffectForCurrentMood();
+          if (eff) triggerEffect(eff);
+        }
+        console.log("[RunTheWorld] Step event → Effect triggered");
+      }
+    } catch (err) {
+      console.error("[RunTheWorld] Invalid message:", event.data);
+    }
+  };
+
+  socket.onerror = (err) => {
+    console.error("[RunTheWorld] WebSocket error:", err);
+    updateInputSource("Disconnected");
+  };
+
+  socket.onclose = () => {
+    console.warn("[RunTheWorld] WebSocket closed. Retrying in 3s.");
+    updateInputSource("Disconnected");
+    setTimeout(connectWebSocket, 3000);
+  };
+}
+
+connectWebSocket();
