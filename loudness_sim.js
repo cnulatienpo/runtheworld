@@ -24,6 +24,10 @@ function getSimulatedLoudness() {
 
 // Trigger hallucination effect
 function triggerLoudnessEffect() {
+  if (typeof window.audioTriggersEnabled !== 'undefined' && !window.audioTriggersEnabled) {
+    // Skip trigger if audio-driven effects are disabled
+    return;
+  }
   if (typeof window.triggerEffect === 'function') {
     window.triggerEffect();
   } else {
