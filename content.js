@@ -580,23 +580,24 @@ function updatePlaylistHUD() {
 // Call this after HUD is created
 updatePlaylistHUD();
 
-// --- Default hallucination spawn timer ---
-function getRandomInterval(min, max) {
-  // min/max in milliseconds
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+// --- Natural hallucination spawn timer ---
+function getNaturalInterval() {
+  // Slight bias to shorter intervals for natural feel
+  const base = 8000 + Math.random() * 10000; // 8s–18s
+  // Add a tiny random jitter (±500ms)
+  const jitter = (Math.random() - 0.5) * 1000;
+  return Math.max(5000, Math.floor(base + jitter)); // never shorter than 5s
 }
 
 function spawnHallucination() {
   // TODO: Replace with your hallucination-spawning logic
-  console.log(
-    'Spawn hallucination! (replace this with your effect/image)'
-  );
-  // e.g., addImageToCanvas(), triggerEffect(), etc.
+  console.log('🌈 Spawn hallucination! (replace with your effect)');
+  // e.g., drawPNGOnCanvas(), applyVisualEffect(), etc.
 }
 
-function startSpawnTimer() {
+function startNaturalSpawnTimer() {
   function scheduleNext() {
-    const interval = getRandomInterval(10000, 20000); // 10–20 seconds
+    const interval = getNaturalInterval();
     setTimeout(() => {
       spawnHallucination();
       scheduleNext();
@@ -605,5 +606,5 @@ function startSpawnTimer() {
   scheduleNext();
 }
 
-// Start the timer when your content/overlay is ready
-startSpawnTimer();
+// Start the natural spawn timer when ready
+startNaturalSpawnTimer();
