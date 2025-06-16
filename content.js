@@ -406,37 +406,54 @@ updateBPM();
 setInterval(updateBPM, 4000);
 
 // Auto-mute YouTube videos on watch pages
+const KEYWORDS = [
+  'walk',
+  'walking',
+  'run',
+  'running',
+  'treadmill',
+  'virtual tour',
+  'stroll',
+  'hiking',
+  'jog',
+  'city walk',
+  'bike ride'
+];
+
+function isFitnessVideo() {
+  const title = document.title.toLowerCase();
+  let channel = '';
+  const channelElem = document.querySelector('#channel-name, ytd-channel-name');
+  if (channelElem) channel = channelElem.innerText.toLowerCase();
+  return KEYWORDS.some((kw) => title.includes(kw) || channel.includes(kw));
+}
+
 if (
   window.location.hostname === 'www.youtube.com' &&
   window.location.pathname === '/watch'
 ) {
-  function muteVideo() {
-    const video = document.querySelector('video');
-    if (video && !video.muted) {
-      video.muted = true;
-      return true;
+  if (isFitnessVideo()) {
+    function muteVideo() {
+      const video = document.querySelector('video');
+      if (video && !video.muted) {
+        video.muted = true;
+        return true;
+      }
+      return false;
     }
-    return false;
-  }
 
-  // Try immediately in case video is already there
-  if (!muteVideo()) {
-    // Try every 250ms for up to 5 seconds
-    let tries = 0;
-    const maxTries = 20;
-    const interval = setInterval(() => {
-      if (muteVideo() || ++tries >= maxTries) {
-        clearInterval(interval);
-      }
-    }, 250);
+    if (!muteVideo()) {
+      let tries = 0;
+      const maxTries = 20;
+      const interval = setInterval(() => {
+        if (muteVideo() || ++tries >= maxTries) clearInterval(interval);
+      }, 250);
 
-    // Observe DOM changes if video appears later
-    const observer = new MutationObserver(() => {
-      if (muteVideo()) {
-        observer.disconnect();
-      }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
+      const observer = new MutationObserver(() => {
+        if (muteVideo()) observer.disconnect();
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
   }
 }
 
