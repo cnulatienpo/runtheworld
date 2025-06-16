@@ -6,7 +6,7 @@
     "high": ["vivid-flash", "liquid-shift"]
   },
   "zones": {
-    "top-right": "deep-mist",
-    "center": "vivid-flash"
+    "top-right": ["deep-mist"],
+    "center": ["vivid-flash"]
   }
 }
