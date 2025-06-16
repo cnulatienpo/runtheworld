@@ -202,6 +202,17 @@ document.getElementById('uh-hud-freq-select').onchange = e => {
   }
 };
 
+// Add Reset Session button
+const resetDiv = document.createElement('div');
+resetDiv.id = 'uh-hud-reset';
+resetDiv.style.margin = '12px 0';
+resetDiv.innerHTML = `
+  <button id="uh-hud-reset-btn" style="font-weight:bold; font-size:1em; border-radius:10px; border:none; padding:7px 18px; background:#f23a3a; color:white; box-shadow:0 2px 8px #0002; transition:background 0.3s;">
+    Reset Session
+  </button>
+`;
+hudPanel.appendChild(resetDiv);
+
 function updateEffectCountHUD(count) {
   const el = document.getElementById('uh-hud-effect-count-val');
   if (el) el.textContent = count;
@@ -227,6 +238,17 @@ document.getElementById('uh-hud-toggle-btn').onclick = () => {
   localStorage.setItem('hallucinationsEnabled', JSON.stringify(hallucinationsEnabled));
   setHallucinationToggleUI(hallucinationsEnabled);
   updateHallucinationMode(hallucinationsEnabled);
+};
+
+// Hook up Reset Session button
+document.getElementById('uh-hud-reset-btn').onclick = () => {
+  resetSession();
+  const panel = document.getElementById('uh-hud-panel');
+  panel.style.transition = 'box-shadow 0.5s, background 0.5s';
+  panel.style.boxShadow = '0 0 30px 10px #f23a3a66';
+  setTimeout(() => {
+    panel.style.boxShadow = '';
+  }, 350);
 };
 
 function updateHallucinationMode(enabled) {
@@ -350,11 +372,11 @@ function resetSession() {
   window.currentEffectPack = currentEffectPack;
   window.sessionStartTime = sessionStartTime;
 
-  localStorage.removeItem('stepCount');
-  localStorage.removeItem('effectCount');
-  localStorage.removeItem('currentMood');
-  localStorage.removeItem('currentEffectPack');
-  localStorage.removeItem('sessionStartTime');
+  localStorage.setItem('stepCount', stepCount);
+  localStorage.setItem('effectCount', effectCount);
+  localStorage.setItem('currentMood', sessionMood);
+  localStorage.setItem('currentEffectPack', currentEffectPack);
+  localStorage.setItem('sessionStartTime', sessionStartTime);
 
   updateStepCountHUD(stepCount);
   document.getElementById('uh-hud-mood-select').value = sessionMood;
