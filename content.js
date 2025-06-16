@@ -776,24 +776,39 @@ function addJustLetMeRunToggle() {
 }
 
 addJustLetMeRunToggle();
-function addTagButtons(tags, onTagClick) {
+
+// --- Music Tag Cache for YouTube Music ---
+// Saves a tag for each song, loads tag when song changes/repeats, and confirms in HUD
+
+function getSongId(info) {
+  return info ? `${info.title} — ${info.artist}` : null;
+}
+
+function getTagCache() {
+  return JSON.parse(localStorage.getItem('tagCache') || '{}');
+}
+
+function setTagCache(cache) {
+  localStorage.setItem('tagCache', JSON.stringify(cache));
+}
+
+function addTagButtons(tags, onTagClick, getCurrentSong) {
   let hud = document.getElementById('urban-hallucination-hud');
   if (!hud) {
     hud = document.createElement('div');
     hud.id = 'urban-hallucination-hud';
-    hud.style.position = "fixed";
-    hud.style.top = "20px";
-    hud.style.right = "20px";
-    hud.style.background = "rgba(0,0,0,0.7)";
-    hud.style.color = "#fff";
-    hud.style.padding = "8px 18px";
-    hud.style.fontSize = "18px";
-    hud.style.zIndex = "999999";
-    hud.style.borderRadius = "8px";
+    hud.style.position = 'fixed';
+    hud.style.top = '20px';
+    hud.style.right = '20px';
+    hud.style.background = 'rgba(0,0,0,0.7)';
+    hud.style.color = '#fff';
+    hud.style.padding = '8px 18px';
+    hud.style.fontSize = '18px';
+    hud.style.zIndex = '999999';
+    hud.style.borderRadius = '8px';
     document.body.appendChild(hud);
   }
 
-  // Remove existing tag wrap if present
   let tagWrap = document.getElementById('hud-tag-buttons');
   if (tagWrap) tagWrap.remove();
 
@@ -801,142 +816,81 @@ function addTagButtons(tags, onTagClick) {
   tagWrap.id = 'hud-tag-buttons';
   tagWrap.style.marginTop = '12px';
 
-  // Create/Find tag status display
   let tagStatus = document.getElementById('hud-tag-status');
   if (!tagStatus) {
     tagStatus = document.createElement('div');
     tagStatus.id = 'hud-tag-status';
-    tagStatus.style.marginTop = "6px";
-    tagStatus.style.fontSize = "16px";
+    tagStatus.style.marginTop = '6px';
+    tagStatus.style.fontSize = '16px';
     hud.appendChild(tagStatus);
   }
 
-  // Copy selected tag to clipboard
-  const copyBtn = document.createElement('button');
-  copyBtn.textContent = 'Copy Tag';
-  copyBtn.style.marginLeft = '12px';
-  copyBtn.style.fontSize = '14px';
-  copyBtn.style.padding = '2px 10px';
-  copyBtn.style.borderRadius = '6px';
-  copyBtn.style.border = 'none';
-  copyBtn.style.background = '#2e2e2e';
-  copyBtn.style.color = '#fff';
-  copyBtn.style.cursor = 'pointer';
-  copyBtn.addEventListener('click', () => {
-    const tag = localStorage.getItem('selectedTag');
-    if (tag) {
-      navigator.clipboard.writeText(tag);
-      alert(`Tag "${tag}" copied to clipboard!`);
-    }
-  });
-  tagStatus.appendChild(copyBtn);
-
-  // Export selected tag as a file
-  const exportBtn = document.createElement('button');
-  exportBtn.textContent = 'Export Tag';
-  exportBtn.style.marginLeft = '8px';
-  exportBtn.style.fontSize = '14px';
-  exportBtn.style.padding = '2px 10px';
-  exportBtn.style.borderRadius = '6px';
-  exportBtn.style.border = 'none';
-  exportBtn.style.background = '#2e2e2e';
-  exportBtn.style.color = '#fff';
-  exportBtn.style.cursor = 'pointer';
-  exportBtn.addEventListener('click', () => {
-    const tag = localStorage.getItem('selectedTag');
-    if (tag) {
-      const blob = new Blob([tag], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'selected-tag.txt';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-  });
-  tagStatus.appendChild(exportBtn);
-
-  // Get saved tag from localStorage
-  const savedTag = localStorage.getItem('selectedTag');
-
-  function updateTagStatus(tag) {
-    tagStatus.textContent = tag
-      ? `Selected tag: ${tag}`
-      : "No tag selected";
-    // Also confirm in console
-    console.log("Selected tag:", tag);
+  function updateTagUI(selectedTag) {
+    Array.from(tagWrap.children).forEach(b =>
+      b.style.background = b.textContent === selectedTag ? '#29a19c' : '#353535'
+    );
+    tagStatus.textContent = selectedTag
+      ? `Selected tag: ${selectedTag}`
+      : 'No tag selected';
+    console.log('Selected tag:', selectedTag);
   }
+
+  const info = getCurrentSong();
+  const songId = getSongId(info);
+  const cache = getTagCache();
+  const savedTag = songId ? cache[songId] : null;
 
   tags.forEach(tag => {
     const btn = document.createElement('button');
     btn.textContent = tag;
-    btn.style.margin = "0 6px 6px 0";
-    btn.style.padding = "4px 14px";
-    btn.style.background = (tag === savedTag) ? "#29a19c" : "#353535";
-    btn.style.color = "#fff";
-    btn.style.border = "none";
-    btn.style.borderRadius = "6px";
-    btn.style.fontSize = "16px";
-    btn.style.cursor = "pointer";
+    btn.style.margin = '0 6px 6px 0';
+    btn.style.padding = '4px 14px';
+    btn.style.background = tag === savedTag ? '#29a19c' : '#353535';
+    btn.style.color = '#fff';
+    btn.style.border = 'none';
+    btn.style.borderRadius = '6px';
+    btn.style.fontSize = '16px';
+    btn.style.cursor = 'pointer';
     btn.addEventListener('click', () => {
-      // Save tag to localStorage
-      localStorage.setItem('selectedTag', tag);
-
-      // Update button styles to show selection
-      Array.from(tagWrap.children).forEach(b =>
-        b.style.background = (b.textContent === tag) ? "#29a19c" : "#353535"
-      );
-      
-      updateTagStatus(tag);
+      if (!info) return;
+      const id = getSongId(info);
+      const cache = getTagCache();
+      cache[id] = tag;
+      setTagCache(cache);
+      updateTagUI(tag);
       onTagClick(tag);
     });
     tagWrap.appendChild(btn);
   });
 
   hud.appendChild(tagWrap);
-
-  // Keyboard shortcuts 1-9 select corresponding tag
-  document.addEventListener('keydown', (e) => {
-    if (!document.getElementById('urban-hallucination-hud')) return;
-    const num = parseInt(e.key);
-    if (num >= 1 && num <= tags.length) {
-      const tagBtn = Array.from(tagWrap.children)[num - 1];
-      if (tagBtn) tagBtn.click();
-    }
-  });
-
-  // On load, update tag status display
-  updateTagStatus(savedTag);
+  updateTagUI(savedTag);
 }
 
-addTagButtons(
-  ["Urban", "Nature", "Dreamcore", "Glide", "Ambient", "Rare"],
-  (tag) => {
-    console.log("Tag clicked & saved:", tag);
-    // TODO: Filter playlists/assets/spawn effects based on tag
-  }
-);
-
-// Auto-load the saved tag whenever a new song begins
-function applySavedTag() {
-  const savedTag = localStorage.getItem('selectedTag');
-  const tagWrap = document.getElementById('hud-tag-buttons');
-  if (tagWrap && savedTag) {
-    Array.from(tagWrap.children).forEach(b =>
-      b.style.background = (b.textContent === savedTag) ? "#29a19c" : "#353535"
-    );
-    // Optionally call your tag logic here:
-    // triggerTagEffect(savedTag);
-  }
-}
-
-let lastSongId = null;
-setInterval(() => {
+function onSongChange(tags, onTagClick) {
   const info = getCurrentSongInfo();
-  if (!info) return;
-  const songId = info.title + " — " + info.artist;
+  const songId = getSongId(info);
   if (songId !== lastSongId) {
     lastSongId = songId;
-    applySavedTag();
+    addTagButtons(tags, onTagClick, getCurrentSongInfo);
   }
-}, 2000);
+}
+
+const tags = ['Urban', 'Nature', 'Dreamcore', 'Glide', 'Ambient', 'Rare'];
+addTagButtons(tags, tag => {
+  console.log('Tag clicked & saved:', tag);
+}, getCurrentSongInfo);
+
+let lastSongId = null;
+setInterval(() => onSongChange(tags, () => {}), 2000);
+
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('urban-hallucination-hud')) return;
+  const num = parseInt(e.key);
+  if (num >= 1 && num <= tags.length) {
+    const tagBtn = Array.from(
+      document.getElementById('hud-tag-buttons').children
+    )[num - 1];
+    if (tagBtn) tagBtn.click();
+  }
+});
