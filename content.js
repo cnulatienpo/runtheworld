@@ -839,3 +839,27 @@ addTagButtons(
     // TODO: Filter playlists/assets/spawn effects based on tag
   }
 );
+
+// Auto-load the saved tag whenever a new song begins
+function applySavedTag() {
+  const savedTag = localStorage.getItem('selectedTag');
+  const tagWrap = document.getElementById('hud-tag-buttons');
+  if (tagWrap && savedTag) {
+    Array.from(tagWrap.children).forEach(b =>
+      b.style.background = (b.textContent === savedTag) ? "#29a19c" : "#353535"
+    );
+    // Optionally call your tag logic here:
+    // triggerTagEffect(savedTag);
+  }
+}
+
+let lastSongId = null;
+setInterval(() => {
+  const info = getCurrentSongInfo();
+  if (!info) return;
+  const songId = info.title + " — " + info.artist;
+  if (songId !== lastSongId) {
+    lastSongId = songId;
+    applySavedTag();
+  }
+}, 2000);
