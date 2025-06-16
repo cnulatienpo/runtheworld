@@ -58,6 +58,10 @@ const frequencyPresets = {
 let effectFrequency = localStorage.getItem('effectFrequency') || 'normal';
 window.effectFrequency = effectFrequency;
 
+// Track the current input source and expose globally
+let inputSource = localStorage.getItem('inputSource') || 'Keyboard';
+window.inputSource = inputSource;
+
 // 1. Create main HUD button and panel
 const hudIcon = document.createElement('div');
 hudIcon.id = 'uh-hud-icon';
@@ -102,7 +106,7 @@ hudPanel.innerHTML = `
     <b>Playlist:</b>
     <input id="uh-hud-playlist" type="text" placeholder="Paste YouTube/Spotify link" style="width:180px;"/>
   </div>
-  <div><b>Input:</b> <span id="uh-hud-input">Fake Server</span></div>
+  <div><b>Input Source:</b> <span id="uh-hud-input">${inputSource}</span></div>
   <div><b>Session Time:</b> <span id="uh-hud-session-elapsed">00:00</span></div>
   <div id="uh-hud-bpm">
     <b>BPM:</b> <span id="uh-hud-bpm-val">120</span><br>
@@ -255,6 +259,12 @@ function updateStepCountHUD(count) {
   const el = document.getElementById('uh-hud-stepcount');
   if (el) el.textContent = count;
   localStorage.setItem('stepCount', count);
+}
+
+function updateInputSourceHUD(source) {
+  const el = document.getElementById('uh-hud-input');
+  if (el) el.textContent = source;
+  localStorage.setItem('inputSource', source);
 }
 
 function setHallucinationToggleUI(enabled) {
@@ -439,7 +449,11 @@ window.uhHUD = {
     stepCount = n;
     updateStepCountHUD(stepCount);
   },
-  setInputSource: src => document.getElementById('uh-hud-input').textContent = src,
+  setInputSource: src => {
+    inputSource = src;
+    window.inputSource = src;
+    updateInputSourceHUD(src);
+  },
   setPack: pack => {
     if (typeof window.updateEffectPackHUD === 'function') {
       window.updateEffectPackHUD(pack);
@@ -483,6 +497,7 @@ window.uhHUD = {
 // Sync counter on startup
 updateEffectCountHUD(effectCount);
 updateStepCountHUD(stepCount);
+updateInputSourceHUD(inputSource);
 
 // Export triggerEffect and reset function to global scope if needed
 window.triggerEffect = triggerEffect;
@@ -492,12 +507,11 @@ window.resetSessionStartTime = resetSessionStartTime;
 window.resetSession = resetSession;
 
 // ----- Step WebSocket Integration -----
-let inputSource = 'Fake Server';
 const socket = new WebSocket('ws://localhost:6789');
 
 socket.onopen = () => {
   console.log('[RunTheWorld] Connected to step server');
-  document.getElementById('uh-hud-input').textContent = inputSource;
+  window.uhHUD.setInputSource('Fake Server');
   clearEffectInterval();
 };
 
@@ -517,11 +531,11 @@ socket.onmessage = event => {
 
 socket.onerror = err => {
   console.error('WebSocket error:', err);
-  document.getElementById('uh-hud-input').textContent = 'WebSocket Error';
+  window.uhHUD.setInputSource('WebSocket Error');
 };
 
 socket.onclose = () => {
-  document.getElementById('uh-hud-input').textContent = 'No Step Input';
+  window.uhHUD.setInputSource('No Step Input');
 };
 
 function pickEffectForCurrentMood() {

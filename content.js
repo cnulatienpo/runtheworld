@@ -322,10 +322,11 @@ window.triggerZoneEffect = triggerZoneEffect;
 
 // --- WebSocket Step Listener ---
 let stepCount = 0;
-let inputSource = "WebSocket (Fake Server)";
+let inputSource = "Keyboard";
 let socket;
 
 function updateInputSource(source) {
+  inputSource = source;
   const label = document.getElementById('input-source-display');
   if (label) label.innerText = `Input Source: ${source}`;
 }
