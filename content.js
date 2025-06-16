@@ -912,3 +912,70 @@ document.addEventListener('keydown', e => {
     if (tagBtn) tagBtn.click();
   }
 });
+
+// --- Hallucination Overlay Mode ---
+function addHallucinationOverlayHUD() {
+  let hud = document.getElementById('urban-hallucination-hud');
+  if (!hud) {
+    hud = document.createElement('div');
+    hud.id = 'urban-hallucination-hud';
+    hud.style.position = 'fixed';
+    hud.style.top = '20px';
+    hud.style.right = '20px';
+    hud.style.background = 'rgba(0,0,0,0.7)';
+    hud.style.color = '#fff';
+    hud.style.padding = '8px 18px';
+    hud.style.fontSize = '18px';
+    hud.style.zIndex = '999999';
+    hud.style.borderRadius = '8px';
+    document.body.appendChild(hud);
+  }
+
+  let hallucBtn = document.getElementById('hud-halluc-mode-btn');
+  if (hallucBtn) hallucBtn.remove();
+
+  hallucBtn = document.createElement('button');
+  hallucBtn.id = 'hud-halluc-mode-btn';
+  hallucBtn.textContent = 'Toggle Hallucination Mode';
+  hallucBtn.style.fontSize = '16px';
+  hallucBtn.style.marginTop = '12px';
+  hallucBtn.style.padding = '4px 14px';
+  hallucBtn.style.borderRadius = '6px';
+  hallucBtn.style.border = 'none';
+  hallucBtn.style.background = '#8e44ad';
+  hallucBtn.style.color = '#fff';
+  hallucBtn.style.cursor = 'pointer';
+  hud.appendChild(hallucBtn);
+
+  let overlay = document.getElementById('hallucination-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'hallucination-overlay';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100vw';
+    overlay.style.height = '100vh';
+    overlay.style.pointerEvents = 'none';
+    overlay.style.zIndex = '99999';
+    overlay.style.transition = 'filter 0.8s';
+    overlay.style.background = 'transparent';
+    document.body.appendChild(overlay);
+  }
+
+  let modeOn = false;
+  hallucBtn.addEventListener('click', () => {
+    modeOn = !modeOn;
+    if (modeOn) {
+      overlay.style.filter = 'blur(3px) hue-rotate(120deg) contrast(1.7) saturate(1.5)';
+      overlay.style.backdropFilter = 'blur(2px)';
+      hallucBtn.textContent = 'Disable Hallucination Mode';
+    } else {
+      overlay.style.filter = '';
+      overlay.style.backdropFilter = '';
+      hallucBtn.textContent = 'Enable Hallucination Mode';
+    }
+  });
+}
+
+addHallucinationOverlayHUD();
