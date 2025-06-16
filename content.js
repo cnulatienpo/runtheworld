@@ -72,3 +72,61 @@ function getEffectsForMood(mood) {
 function getZoneEffect(zone) {
   return zoneEffectMap[zone];
 }
+
+// --- Screen zone definitions ---
+const screenZones = {
+  "top-left": { top: 0, left: 0, width: "30vw", height: "30vh" },
+  "center": { top: "35vh", left: "35vw", width: "30vw", height: "30vh" },
+  "bottom": { bottom: 0, left: 0, width: "100vw", height: "25vh" },
+};
+
+// Get computed style object for a zone
+function getZoneStyles(zoneName) {
+  const zone = screenZones[zoneName];
+  if (!zone) return {};
+  const style = {
+    position: "fixed",
+    pointerEvents: "none",
+    zIndex: 99998,
+    ...zone,
+  };
+  if (!style.top && style.top !== 0) style.top = "auto";
+  if (!style.bottom && style.bottom !== 0) style.bottom = "auto";
+  if (!style.left && style.left !== 0) style.left = "auto";
+  if (!style.right && style.right !== 0) style.right = "auto";
+  return style;
+}
+
+// Debug helpers to visualize zones
+function showDebugZones() {
+  Object.entries(screenZones).forEach(([name, _style], idx) => {
+    const box = document.createElement("div");
+    Object.assign(box.style, getZoneStyles(name));
+    box.style.background = `rgba(${(60 * idx) % 255}, ${(180 * idx) % 255}, ${(90 * idx) % 255}, 0.18)`;
+    box.style.border = "2px dashed #0008";
+    box.style.fontSize = "1.2em";
+    box.style.color = "#000";
+    box.style.display = "flex";
+    box.style.alignItems = "center";
+    box.style.justifyContent = "center";
+    box.className = "uh-debug-zone";
+    box.innerText = name;
+    document.body.appendChild(box);
+  });
+}
+
+function removeDebugZones() {
+  document.querySelectorAll(".uh-debug-zone").forEach(el => el.remove());
+}
+
+function createZoneOverlay(zoneName, effectElement) {
+  Object.assign(effectElement.style, getZoneStyles(zoneName));
+  document.body.appendChild(effectElement);
+}
+
+// Export helpers if needed
+window.screenZones = screenZones;
+window.getZoneStyles = getZoneStyles;
+window.showDebugZones = showDebugZones;
+window.removeDebugZones = removeDebugZones;
+window.createZoneOverlay = createZoneOverlay;
