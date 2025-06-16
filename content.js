@@ -690,22 +690,21 @@ window.addEventListener('load', () => {
   scheduleNextSpawn();
 });
 
-// --- Session Timer ---
-let sessionStart = Date.now();
+// --- Simple Timer in Overlay (HUD) ---
+let timerStart = Date.now();
 
-function formatTime(ms) {
-  // Format ms as mm:ss
+function formatTimer(ms) {
   const totalSeconds = Math.floor(ms / 1000);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
-function updateSessionTimer() {
+function updateOverlayTimer() {
   const now = Date.now();
-  const elapsed = now - sessionStart;
+  const elapsed = now - timerStart;
 
-  // Find or create the HUD
+  // Find or create HUD
   let hud = document.getElementById('urban-hallucination-hud');
   if (!hud) {
     hud = document.createElement('div');
@@ -722,21 +721,22 @@ function updateSessionTimer() {
     document.body.appendChild(hud);
   }
 
-  // Find or create session timer field
-  let timer = document.getElementById('session-timer');
-  if (!timer) {
-    timer = document.createElement('div');
-    timer.id = 'session-timer';
-    timer.style.marginTop = '8px';
-    hud.appendChild(timer);
+  // Find or create the timer element
+  let timerEl = document.getElementById('overlay-timer');
+  if (!timerEl) {
+    timerEl = document.createElement('div');
+    timerEl.id = 'overlay-timer';
+    timerEl.style.marginTop = '6px';
+    timerEl.style.fontSize = '20px';
+    hud.appendChild(timerEl);
   }
 
-  timer.textContent = `Session: ${formatTime(elapsed)}`;
+  timerEl.textContent = `Time: ${formatTimer(elapsed)}`;
 }
 
-// Start and update the timer every second
-setInterval(updateSessionTimer, 1000);
-updateSessionTimer(); // show immediately on load
+// Update every second
+setInterval(updateOverlayTimer, 1000);
+updateOverlayTimer(); // show immediately on load
 
 // --- "Just Let Me Run" Toggle ---
 function addJustLetMeRunToggle() {
