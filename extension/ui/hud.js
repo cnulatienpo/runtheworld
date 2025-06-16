@@ -102,7 +102,7 @@ hudPanel.innerHTML = `
     <b>Playlist:</b>
     <input id="uh-hud-playlist" type="text" placeholder="Paste YouTube/Spotify link" style="width:180px;"/>
   </div>
-  <div><b>Input:</b> <span id="uh-hud-input">Keyboard</span></div>
+  <div><b>Input:</b> <span id="uh-hud-input">Fake Server</span></div>
   <div><b>Session Time:</b> <span id="uh-hud-session-elapsed">00:00</span></div>
   <div id="uh-hud-bpm">
     <b>BPM:</b> <span id="uh-hud-bpm-val">120</span><br>
@@ -229,7 +229,6 @@ document.getElementById('uh-hud-freq-select').onchange = e => {
   localStorage.setItem('effectFrequency', effectFrequency);
   document.getElementById('uh-hud-freq-label').textContent =
     'Intensity: ' + effectFrequency.charAt(0).toUpperCase() + effectFrequency.slice(1);
-  restartEffectInterval();
   if (typeof window.__uhHUDFreqCB === 'function') {
     window.__uhHUDFreqCB(effectFrequency);
   }
@@ -369,7 +368,6 @@ function restartEffectInterval() {
   startEffectInterval();
 }
 
-startEffectInterval();
 
 function triggerEffect(...args) {
   if (hallucinationsEnabled) {
@@ -474,7 +472,6 @@ window.uhHUD = {
     localStorage.setItem('effectFrequency', freq);
     document.getElementById('uh-hud-freq-label').textContent =
       'Intensity: ' + freq.charAt(0).toUpperCase() + freq.slice(1);
-    restartEffectInterval();
   },
   getEffectFrequency: () => effectFrequency,
   onEffectFrequencyChange: cb => window.__uhHUDFreqCB = cb,
@@ -493,3 +490,42 @@ window.triggerEffectForMood = triggerEffectForMood;
 window.resetEffectCount = resetEffectCount;
 window.resetSessionStartTime = resetSessionStartTime;
 window.resetSession = resetSession;
+
+// ----- Step WebSocket Integration -----
+let inputSource = 'Fake Server';
+const socket = new WebSocket('ws://localhost:6789');
+
+socket.onopen = () => {
+  console.log('[RunTheWorld] Connected to step server');
+  document.getElementById('uh-hud-input').textContent = inputSource;
+  clearEffectInterval();
+};
+
+socket.onmessage = event => {
+  try {
+    const data = JSON.parse(event.data);
+    if (data.steps) {
+      triggerEffect(pickEffectForCurrentMood());
+      stepCount += data.steps;
+      updateStepCountHUD(stepCount);
+      console.log('[RunTheWorld] Effect triggered by step');
+    }
+  } catch (err) {
+    console.error('WebSocket parse error:', err);
+  }
+};
+
+socket.onerror = err => {
+  console.error('WebSocket error:', err);
+  document.getElementById('uh-hud-input').textContent = 'WebSocket Error';
+};
+
+socket.onclose = () => {
+  document.getElementById('uh-hud-input').textContent = 'No Step Input';
+};
+
+function pickEffectForCurrentMood() {
+  const mood = sessionMood || 'medium';
+  const options = moodEffectMap[mood] || ['soft'];
+  return options[Math.floor(Math.random() * options.length)];
+}
