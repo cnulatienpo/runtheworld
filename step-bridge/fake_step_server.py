@@ -12,6 +12,10 @@ async def broadcast_steps():
     global step_count
     while True:
         await asyncio.sleep(2)  # wait 2 seconds between steps
+        # Placeholder for real device integration
+        # In the future this function could update ``step_count`` based on
+        # data read from a wearable device instead of simply incrementing.
+        await read_real_device()
         step_count += 1
         message = json.dumps({"steps": step_count})
         # Send to all connected clients
@@ -19,8 +23,6 @@ async def broadcast_steps():
             await asyncio.gather(*[ws.send(message) for ws in connected])
         # Optional debug output
         print(f"Sent: {message}")
-        # Placeholder for real device integration
-        # read_real_device() could update step_count instead of incrementing
 
 async def handler(websocket):
     """Register client connections and cleanup on disconnect."""
