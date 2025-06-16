@@ -1,30 +1,45 @@
-// Load effect packs and integrate with HUD
+// Manage effect packs loaded from JSON files
+let moodEffectMap = {};
+let zoneEffectMap = {};
 let effectPacks = {};
-let effectPackList = [];
-let currentEffectPack = localStorage.getItem('currentEffectPack') || '';
+let currentEffectPack = localStorage.getItem('currentEffectPack') || 'cyberpunk';
 
-async function loadEffectPacks() {
+function updateEffectPackHUD(packName) {
+  const label = document.getElementById('uh-hud-pack-label');
+  if (label) label.textContent = packName;
+  const sel = document.getElementById('uh-hud-pack');
+  if (sel) sel.value = packName;
+  window.currentEffectPack = packName;
+}
+
+// Load a single effect pack and update mappings
+async function loadEffectPack(packName) {
+  const resp = await fetch(`effect-packs/${packName}.json`);
+  if (!resp.ok) throw new Error(`Could not load effect pack: ${packName}`);
+  const pack = await resp.json();
+
+  effectPacks[packName] = pack;
+  moodEffectMap = pack.moods || {};
+  zoneEffectMap = pack.zones || {};
+
+  updateEffectPackHUD(pack.name);
+
+  localStorage.setItem('currentEffectPack', packName);
+}
+
+// Initialize packs and populate dropdown
+async function initializeEffectPacks() {
   const packNames = ['cyberpunk', 'dreamcore', 'industrial'];
+  const sel = document.getElementById('uh-hud-pack');
+  sel.innerHTML = '';
   for (let name of packNames) {
-    try {
-      const resp = await fetch(`effect-packs/${name}.json`);
-      if (resp.ok) {
-        const pack = await resp.json();
-        effectPacks[pack.name] = pack;
-        effectPackList.push(pack.name);
-      }
-    } catch (err) {
-      console.error('Failed to load pack', name, err);
-    }
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+    sel.appendChild(opt);
   }
-
-  if (!currentEffectPack || !effectPacks[currentEffectPack]) {
-    currentEffectPack = effectPackList[Math.floor(Math.random() * effectPackList.length)];
-    localStorage.setItem('currentEffectPack', currentEffectPack);
-  }
-
-  populatePackDropdown();
-  updateEffectPackHUD(currentEffectPack);
+  sel.value = currentEffectPack;
+  await loadEffectPack(currentEffectPack);
 }
 
 // Create dropdown container
@@ -37,48 +52,23 @@ packDiv.innerHTML = `
   <span id="uh-hud-pack-label" style="margin-left:10px; font-weight:bold;">${currentEffectPack}</span>
 `;
 
-function populatePackDropdown() {
-  const sel = document.getElementById('uh-hud-pack');
-  sel.innerHTML = '';
-  effectPackList.forEach(name => {
-    const opt = document.createElement('option');
-    opt.value = name;
-    opt.textContent = name;
-    sel.appendChild(opt);
-  });
-  sel.value = currentEffectPack;
-}
-
-function updateEffectPackHUD(packName) {
-  const label = document.getElementById('uh-hud-pack-label');
-  if (label) label.textContent = packName;
-  const sel = document.getElementById('uh-hud-pack');
-  if (sel) sel.value = packName;
-  window.currentEffectPack = packName;
-}
-
-function handlePackChange(e) {
-  currentEffectPack = e.target.value;
-  localStorage.setItem('currentEffectPack', currentEffectPack);
-  updateEffectPackHUD(currentEffectPack);
-  if (window.__uhHUDPackCB) window.__uhHUDPackCB(currentEffectPack);
-}
-
-// Wait for HUD panel then append dropdown and load packs
-window.addEventListener('DOMContentLoaded', () => {
+// Startup when HUD exists
+window.addEventListener('DOMContentLoaded', async () => {
   const panel = document.getElementById('uh-hud-panel');
   if (panel) {
     panel.appendChild(packDiv);
-    document.getElementById('uh-hud-pack').onchange = handlePackChange;
-    loadEffectPacks();
+    await initializeEffectPacks();
+    document.getElementById('uh-hud-pack').onchange = async e => {
+      await loadEffectPack(e.target.value);
+    };
   }
 });
 
-// Example helper to get effects for current mood
+// Helper to use current mappings
 function getEffectsForMood(mood) {
-  const pack = effectPacks[currentEffectPack];
-  if (pack && pack.moods[mood]) {
-    return pack.moods[mood];
-  }
-  return [];
+  return moodEffectMap[mood] || [];
+}
+
+function getZoneEffect(zone) {
+  return zoneEffectMap[zone];
 }

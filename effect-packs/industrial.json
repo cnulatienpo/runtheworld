@@ -4,5 +4,9 @@
     "low": ["rust-grain", "smoke-overlay"],
     "medium": ["gear-spark", "steam-bleed"],
     "high": ["metal-clang", "factory-blast"]
+  },
+  "zones": {
+    "bottom-left": "rust-grain",
+    "center": "factory-blast"
   }
 }

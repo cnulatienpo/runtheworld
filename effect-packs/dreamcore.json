@@ -4,5 +4,9 @@
     "low": ["hazy-fade", "pastel-flow"],
     "medium": ["echo-swirl", "deep-mist"],
     "high": ["vivid-flash", "liquid-shift"]
+  },
+  "zones": {
+    "top-right": "deep-mist",
+    "center": "vivid-flash"
   }
 }
