@@ -1,0 +1,8 @@
+{
+  "name": "Cyberpunk",
+  "moods": {
+    "low": ["soft-glow", "flicker-lines"],
+    "medium": ["static-drift", "scanline-burst"],
+    "high": ["neon-bloom", "electric-smear"]
+  }
+}

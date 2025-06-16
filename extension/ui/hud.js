@@ -16,7 +16,7 @@ window.stepCount = stepCount;
 let effectCount = Number(localStorage.getItem('effectCount') || 0);
 
 // Restore effect pack selection or set default
-let currentEffectPack = localStorage.getItem('currentEffectPack') || 'urban';
+let currentEffectPack = localStorage.getItem('currentEffectPack') || '';
 window.currentEffectPack = currentEffectPack;
 
 // Restore or initialize session start time
@@ -83,15 +83,6 @@ hudPanel.innerHTML = `
     <b>BPM:</b> <span id="uh-hud-bpm-val">120</span><br>
     <b>Energy:</b> <span id="uh-hud-energy-val">Medium</span>
   </div>
-  <div>
-    <b>Hallucination Pack:</b>
-    <select id="uh-hud-pack">
-      <option value="urban">Urban</option>
-      <option value="cyberpunk">Cyberpunk</option>
-      <option value="nature">Nature</option>
-      <option value="random">Random</option>
-    </select>
-  </div>
 `;
 
 // Add Mood dropdown to HUD
@@ -110,18 +101,6 @@ moodDiv.innerHTML = `
 `;
 
 hudPanel.appendChild(moodDiv);
-
-// Setup hallucination pack select
-const packSelect = document.getElementById('uh-hud-pack');
-packSelect.value = currentEffectPack;
-packSelect.onchange = e => {
-  currentEffectPack = e.target.value;
-  window.currentEffectPack = currentEffectPack;
-  localStorage.setItem('currentEffectPack', currentEffectPack);
-  if (typeof window.__uhHUDPackCB === 'function') {
-    window.__uhHUDPackCB(currentEffectPack);
-  }
-};
 
 // Set initial mood and handler
 const moodSelect = document.getElementById('uh-hud-mood-select');
@@ -364,7 +343,7 @@ function resetSession() {
   stepCount = 0;
   effectCount = 0;
   sessionMood = 'medium';
-  currentEffectPack = 'urban';
+  currentEffectPack = localStorage.getItem('currentEffectPack') || currentEffectPack || 'urban';
   sessionStartTime = Date.now();
 
   window.stepCount = stepCount;
@@ -382,7 +361,12 @@ function resetSession() {
   document.getElementById('uh-hud-mood-select').value = sessionMood;
   document.getElementById('uh-hud-mood-label').textContent =
     'Mood: ' + sessionMood.charAt(0).toUpperCase() + sessionMood.slice(1);
-  document.getElementById('uh-hud-pack').value = currentEffectPack;
+  if (typeof window.updateEffectPackHUD === 'function') {
+    window.updateEffectPackHUD(currentEffectPack);
+  } else {
+    const sel = document.getElementById('uh-hud-pack');
+    if (sel) sel.value = currentEffectPack;
+  }
   updateElapsedTimeDisplay(0);
   updateEffectCountHUD(effectCount);
 }
@@ -396,7 +380,12 @@ window.uhHUD = {
   },
   setInputSource: src => document.getElementById('uh-hud-input').textContent = src,
   setPack: pack => {
-    document.getElementById('uh-hud-pack').value = pack;
+    if (typeof window.updateEffectPackHUD === 'function') {
+      window.updateEffectPackHUD(pack);
+    } else {
+      const sel = document.getElementById('uh-hud-pack');
+      if (sel) sel.value = pack;
+    }
     currentEffectPack = pack;
     window.currentEffectPack = pack;
     localStorage.setItem('currentEffectPack', pack);

@@ -1,0 +1,8 @@
+{
+  "name": "Industrial",
+  "moods": {
+    "low": ["rust-grain", "smoke-overlay"],
+    "medium": ["gear-spark", "steam-bleed"],
+    "high": ["metal-clang", "factory-blast"]
+  }
+}

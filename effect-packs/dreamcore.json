@@ -1,0 +1,8 @@
+{
+  "name": "Dreamcore",
+  "moods": {
+    "low": ["hazy-fade", "pastel-flow"],
+    "medium": ["echo-swirl", "deep-mist"],
+    "high": ["vivid-flash", "liquid-shift"]
+  }
+}
