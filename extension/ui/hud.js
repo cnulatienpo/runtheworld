@@ -5,11 +5,19 @@ let hallucinationsEnabled = JSON.parse(localStorage.getItem('hallucinationsEnabl
 window.hallucinationsEnabled = hallucinationsEnabled;
 
 // 0b. Restore session mood from localStorage or set default
-let sessionMood = localStorage.getItem('sessionMood') || 'medium';
+let sessionMood = localStorage.getItem('currentMood') || 'medium';
 window.sessionMood = sessionMood;
+
+// Restore step count from storage or start at 0
+let stepCount = Number(localStorage.getItem('stepCount') || 0);
+window.stepCount = stepCount;
 
 // Restore effect count from storage or start at 0
 let effectCount = Number(localStorage.getItem('effectCount') || 0);
+
+// Restore effect pack selection or set default
+let currentEffectPack = localStorage.getItem('currentEffectPack') || 'urban';
+window.currentEffectPack = currentEffectPack;
 
 // Restore or initialize session start time
 let sessionStartTime = Number(localStorage.getItem('sessionStartTime') || Date.now());
@@ -103,13 +111,25 @@ moodDiv.innerHTML = `
 
 hudPanel.appendChild(moodDiv);
 
+// Setup hallucination pack select
+const packSelect = document.getElementById('uh-hud-pack');
+packSelect.value = currentEffectPack;
+packSelect.onchange = e => {
+  currentEffectPack = e.target.value;
+  window.currentEffectPack = currentEffectPack;
+  localStorage.setItem('currentEffectPack', currentEffectPack);
+  if (typeof window.__uhHUDPackCB === 'function') {
+    window.__uhHUDPackCB(currentEffectPack);
+  }
+};
+
 // Set initial mood and handler
 const moodSelect = document.getElementById('uh-hud-mood-select');
 moodSelect.value = sessionMood;
 moodSelect.onchange = e => {
   sessionMood = e.target.value;
   window.sessionMood = sessionMood;
-  localStorage.setItem('sessionMood', sessionMood);
+  localStorage.setItem('currentMood', sessionMood);
   document.getElementById('uh-hud-mood-label').textContent =
     'Mood: ' + sessionMood.charAt(0).toUpperCase() + sessionMood.slice(1);
   if (typeof window.__uhHUDMoodCB === 'function') {
@@ -186,6 +206,12 @@ function updateEffectCountHUD(count) {
   const el = document.getElementById('uh-hud-effect-count-val');
   if (el) el.textContent = count;
   localStorage.setItem('effectCount', count);
+}
+
+function updateStepCountHUD(count) {
+  const el = document.getElementById('uh-hud-stepcount');
+  if (el) el.textContent = count;
+  localStorage.setItem('stepCount', count);
 }
 
 function setHallucinationToggleUI(enabled) {
@@ -312,20 +338,56 @@ function resetSessionStartTime() {
   resetEffectCount();
 }
 
+function resetSession() {
+  stepCount = 0;
+  effectCount = 0;
+  sessionMood = 'medium';
+  currentEffectPack = 'urban';
+  sessionStartTime = Date.now();
+
+  window.stepCount = stepCount;
+  window.sessionMood = sessionMood;
+  window.currentEffectPack = currentEffectPack;
+  window.sessionStartTime = sessionStartTime;
+
+  localStorage.removeItem('stepCount');
+  localStorage.removeItem('effectCount');
+  localStorage.removeItem('currentMood');
+  localStorage.removeItem('currentEffectPack');
+  localStorage.removeItem('sessionStartTime');
+
+  updateStepCountHUD(stepCount);
+  document.getElementById('uh-hud-mood-select').value = sessionMood;
+  document.getElementById('uh-hud-mood-label').textContent =
+    'Mood: ' + sessionMood.charAt(0).toUpperCase() + sessionMood.slice(1);
+  document.getElementById('uh-hud-pack').value = currentEffectPack;
+  updateElapsedTimeDisplay(0);
+  updateEffectCountHUD(effectCount);
+}
+
 // 8. Exported functions (to connect data later)
 // Use window.uhHUD.setStepCount(n), setInputSource('SlimeVR'), etc.
 window.uhHUD = {
-  setStepCount: n => document.getElementById('uh-hud-stepcount').textContent = n,
+  setStepCount: n => {
+    stepCount = n;
+    updateStepCountHUD(stepCount);
+  },
   setInputSource: src => document.getElementById('uh-hud-input').textContent = src,
-  setPack: pack => document.getElementById('uh-hud-pack').value = pack,
+  setPack: pack => {
+    document.getElementById('uh-hud-pack').value = pack;
+    currentEffectPack = pack;
+    window.currentEffectPack = pack;
+    localStorage.setItem('currentEffectPack', pack);
+  },
   getPlaylist: () => document.getElementById('uh-hud-playlist').value,
-  onPackChange: cb => document.getElementById('uh-hud-pack').onchange = e => cb(e.target.value),
+  getPack: () => currentEffectPack,
+  onPackChange: cb => window.__uhHUDPackCB = cb,
   setHallucinationMode: enabled => updateHallucinationMode(enabled),
   setMood: mood => {
     document.getElementById('uh-hud-mood-select').value = mood;
     sessionMood = mood;
     window.sessionMood = mood;
-    localStorage.setItem('sessionMood', mood);
+    localStorage.setItem('currentMood', mood);
     document.getElementById('uh-hud-mood-label').textContent =
       'Mood: ' + mood.charAt(0).toUpperCase() + mood.slice(1);
   },
@@ -344,12 +406,15 @@ window.uhHUD = {
   onEffectFrequencyChange: cb => window.__uhHUDFreqCB = cb,
   resetEffectCount,
   resetSessionStartTime,
+  resetSession,
 };
 
 // Sync counter on startup
 updateEffectCountHUD(effectCount);
+updateStepCountHUD(stepCount);
 
 // Export triggerEffect and reset function to global scope if needed
 window.triggerEffect = triggerEffect;
 window.resetEffectCount = resetEffectCount;
 window.resetSessionStartTime = resetSessionStartTime;
+window.resetSession = resetSession;
