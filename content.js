@@ -642,34 +642,53 @@ function updateSongHUD() {
 
 setInterval(updateSongHUD, 2000);
 
-// --- Natural hallucination spawn timer ---
-function getNaturalInterval() {
-  // Slight bias to shorter intervals for natural feel
-  const base = 8000 + Math.random() * 10000; // 8s–18s
-  // Add a tiny random jitter (±500ms)
-  const jitter = (Math.random() - 0.5) * 1000;
-  return Math.max(5000, Math.floor(base + jitter)); // never shorter than 5s
+// --- Hallucination spawn timer controlled by selected tag ---
+const tagIntervals = {
+  Dreamcore: [5000, 10000], // 5–10 sec
+  Urban: [8000, 16000], // 8–16 sec
+  Ambient: [15000, 30000], // 15–30 sec
+  Glide: [10000, 25000], // 10–25 sec
+  Rare: [30000, 90000], // 30–90 sec
+  Nature: [12000, 25000], // 12–25 sec,
+  default: [12000, 24000]
+};
+
+function getSpawnInterval(tag) {
+  const [min, max] = tagIntervals[tag] || tagIntervals.default;
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+let hallucinationTimer = null;
+let currentTag = localStorage.getItem('selectedTag') || 'default';
 
 function spawnHallucination() {
   // TODO: Replace with your hallucination-spawning logic
-  console.log('🌈 Spawn hallucination! (replace with your effect)');
-  // e.g., drawPNGOnCanvas(), applyVisualEffect(), etc.
+  console.log('Spawned hallucination with tag:', currentTag);
 }
 
-function startNaturalSpawnTimer() {
-  function scheduleNext() {
-    const interval = getNaturalInterval();
-    setTimeout(() => {
-      spawnHallucination();
-      scheduleNext();
-    }, interval);
-  }
-  scheduleNext();
+function scheduleNextSpawn() {
+  clearTimeout(hallucinationTimer);
+  const interval = getSpawnInterval(currentTag);
+  hallucinationTimer = setTimeout(() => {
+    spawnHallucination();
+    scheduleNextSpawn();
+  }, interval);
 }
 
-// Start the natural spawn timer when ready
-startNaturalSpawnTimer();
+function onTagChange(tag) {
+  currentTag = tag;
+  localStorage.setItem('selectedTag', tag);
+  scheduleNextSpawn();
+}
+
+// Start the spawn timer when the script loads
+scheduleNextSpawn();
+
+// Re-apply timing when the page is reloaded
+window.addEventListener('load', () => {
+  currentTag = localStorage.getItem('selectedTag') || 'default';
+  scheduleNextSpawn();
+});
 
 // --- Session Timer ---
 let sessionStart = Date.now();
@@ -857,6 +876,7 @@ function addTagButtons(tags, onTagClick, getCurrentSong) {
       const cache = getTagCache();
       cache[id] = tag;
       setTagCache(cache);
+      localStorage.setItem('selectedTag', tag);
       updateTagUI(tag);
       onTagClick(tag);
     });
@@ -877,12 +897,10 @@ function onSongChange(tags, onTagClick) {
 }
 
 const tags = ['Urban', 'Nature', 'Dreamcore', 'Glide', 'Ambient', 'Rare'];
-addTagButtons(tags, tag => {
-  console.log('Tag clicked & saved:', tag);
-}, getCurrentSongInfo);
+addTagButtons(tags, onTagChange, getCurrentSongInfo);
 
 let lastSongId = null;
-setInterval(() => onSongChange(tags, () => {}), 2000);
+setInterval(() => onSongChange(tags, onTagChange), 2000);
 
 document.addEventListener('keydown', e => {
   if (!document.getElementById('urban-hallucination-hud')) return;
