@@ -979,3 +979,49 @@ function addHallucinationOverlayHUD() {
 }
 
 addHallucinationOverlayHUD();
+
+// --- Live Audio Analysis for YouTube Video Element ---
+let audioAnalyser = null;
+let audioContext = null;
+let sourceNode = null;
+let beatThreshold = 0.28;  // Tune as needed
+let lastTrigger = 0;
+let minInterval = 300;     // Minimum ms between triggers (for fake BPM)
+
+function startAudioAnalysis() {
+  const video = document.querySelector('video');
+  if (!video) return;
+  if (audioContext) return; // Don't double-connect
+
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  sourceNode = audioContext.createMediaElementSource(video);
+  audioAnalyser = audioContext.createAnalyser();
+  sourceNode.connect(audioAnalyser);
+  audioAnalyser.connect(audioContext.destination);
+
+  audioAnalyser.fftSize = 256;
+  const bufferLength = audioAnalyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+
+  function checkBeat() {
+    audioAnalyser.getByteFrequencyData(dataArray);
+    // Calculate average loudness in 60–250Hz band (rough bass/beat zone)
+    let sum = 0;
+    let count = 0;
+    for (let i = 3; i < 12; i++) { sum += dataArray[i]; count++; }
+    const avg = sum / count / 255;
+
+    const now = Date.now();
+    if (avg > beatThreshold && now - lastTrigger > minInterval) {
+      lastTrigger = now;
+      // --- YOUR EFFECT HERE: (e.g. spawn a hallucination, pulse filter) ---
+      console.log("💥 Beat detected! avg:", avg.toFixed(2));
+      // spawnHallucination();
+    }
+    requestAnimationFrame(checkBeat);
+  }
+  checkBeat();
+}
+
+// Call this once video is loaded
+setTimeout(startAudioAnalysis, 3000); // (Or hook into MutationObserver when video appears)
