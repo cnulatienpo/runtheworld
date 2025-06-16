@@ -643,3 +643,51 @@ function startNaturalSpawnTimer() {
 
 // Start the natural spawn timer when ready
 startNaturalSpawnTimer();
+
+// --- Session Timer ---
+let sessionStart = Date.now();
+
+function formatTime(ms) {
+  // Format ms as mm:ss
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function updateSessionTimer() {
+  const now = Date.now();
+  const elapsed = now - sessionStart;
+
+  // Find or create the HUD
+  let hud = document.getElementById('urban-hallucination-hud');
+  if (!hud) {
+    hud = document.createElement('div');
+    hud.id = 'urban-hallucination-hud';
+    hud.style.position = 'fixed';
+    hud.style.top = '20px';
+    hud.style.right = '20px';
+    hud.style.background = 'rgba(0,0,0,0.7)';
+    hud.style.color = '#fff';
+    hud.style.padding = '8px 18px';
+    hud.style.fontSize = '18px';
+    hud.style.zIndex = '999999';
+    hud.style.borderRadius = '8px';
+    document.body.appendChild(hud);
+  }
+
+  // Find or create session timer field
+  let timer = document.getElementById('session-timer');
+  if (!timer) {
+    timer = document.createElement('div');
+    timer.id = 'session-timer';
+    timer.style.marginTop = '8px';
+    hud.appendChild(timer);
+  }
+
+  timer.textContent = `Session: ${formatTime(elapsed)}`;
+}
+
+// Start and update the timer every second
+setInterval(updateSessionTimer, 1000);
+updateSessionTimer(); // show immediately on load
