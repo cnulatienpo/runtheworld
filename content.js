@@ -428,10 +428,14 @@ function isFitnessVideo() {
   return KEYWORDS.some((kw) => title.includes(kw) || channel.includes(kw));
 }
 
-if (
-  window.location.hostname === 'www.youtube.com' &&
-  window.location.pathname === '/watch'
-) {
+function isYouTubeWatchPage() {
+  return (
+    window.location.hostname === 'www.youtube.com' &&
+    window.location.pathname === '/watch'
+  );
+}
+
+if (isYouTubeWatchPage()) {
   if (isFitnessVideo()) {
     function muteVideo() {
       const video = document.querySelector('video');
