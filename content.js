@@ -547,7 +547,7 @@ function updatePlaylistHUD() {
   let playlistWrap = document.getElementById('playlist-hud-wrap');
   if (playlistWrap) playlistWrap.remove();
 
-  // Create wrapper for playlist dropdown
+  // Create wrapper for playlist dropdown + button
   playlistWrap = document.createElement('div');
   playlistWrap.id = 'playlist-hud-wrap';
   playlistWrap.style.marginTop = '12px';
@@ -576,8 +576,27 @@ function updatePlaylistHUD() {
     console.log('Selected playlist:', value);
   });
 
+  // Start Playlist Button
+  const button = document.createElement('button');
+  button.textContent = 'Start Playlist';
+  button.style.marginLeft = '12px';
+  button.style.fontSize = '16px';
+  button.style.padding = '4px 14px';
+  button.style.background = '#222';
+  button.style.color = '#fff';
+  button.style.border = 'none';
+  button.style.borderRadius = '6px';
+  button.style.cursor = 'pointer';
+  button.addEventListener('click', () => {
+    const selected = select.value;
+    // TODO: Replace with real playlist start logic
+    console.log('Starting playlist:', selected);
+    // You can trigger overlay logic, send a message, or launch a link here
+  });
+
   playlistWrap.appendChild(label);
   playlistWrap.appendChild(select);
+  playlistWrap.appendChild(button);
   hud.appendChild(playlistWrap);
 }
 
