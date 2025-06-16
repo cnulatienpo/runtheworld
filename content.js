@@ -607,6 +607,86 @@ function updatePlaylistHUD() {
 // Call this after HUD is created
 updatePlaylistHUD();
 
+// --- Mood/BPM selector and playlist loader ---
+const moodPlaylists = {
+  "Chill": {
+    bpm: "90–110",
+    playlist: "https://www.youtube.com/playlist?list=PLChillSample"
+  },
+  "Uplifting": {
+    bpm: "120–140",
+    playlist: "https://www.youtube.com/playlist?list=PLUpliftSample"
+  },
+  "High Energy": {
+    bpm: "150–170",
+    playlist: "https://www.youtube.com/playlist?list=PLHighEnergySample"
+  }
+};
+
+function addMoodSelectorHUD() {
+  let hud = document.getElementById('urban-hallucination-hud');
+  if (!hud) {
+    hud = document.createElement('div');
+    hud.id = 'urban-hallucination-hud';
+    hud.style.position = 'fixed';
+    hud.style.top = '20px';
+    hud.style.right = '20px';
+    hud.style.background = 'rgba(0,0,0,0.7)';
+    hud.style.color = '#fff';
+    hud.style.padding = '8px 18px';
+    hud.style.fontSize = '18px';
+    hud.style.zIndex = '999999';
+    hud.style.borderRadius = '8px';
+    document.body.appendChild(hud);
+  }
+
+  // Remove existing if present
+  let moodWrap = document.getElementById('hud-mood-wrap');
+  if (moodWrap) moodWrap.remove();
+
+  moodWrap = document.createElement('div');
+  moodWrap.id = 'hud-mood-wrap';
+  moodWrap.style.marginTop = '12px';
+
+  const label = document.createElement('label');
+  label.textContent = 'Mood/BPM: ';
+  label.style.marginRight = '8px';
+
+  const select = document.createElement('select');
+  select.id = 'bpm-selector';
+  select.style.fontSize = '16px';
+
+  Object.keys(moodPlaylists).forEach(mood => {
+    const option = document.createElement('option');
+    option.value = mood;
+    option.textContent = `${mood} (${moodPlaylists[mood].bpm} BPM)`;
+    select.appendChild(option);
+  });
+
+  const btn = document.createElement('button');
+  btn.textContent = 'Load Playlist';
+  btn.style.marginLeft = '10px';
+  btn.style.fontSize = '16px';
+  btn.style.padding = '4px 14px';
+  btn.style.borderRadius = '6px';
+  btn.style.border = 'none';
+  btn.style.background = '#1565c0';
+  btn.style.color = '#fff';
+  btn.style.cursor = 'pointer';
+  btn.addEventListener('click', () => {
+    const mood = select.value;
+    const url = moodPlaylists[mood].playlist;
+    if (url) window.open(url, '_blank');
+  });
+
+  moodWrap.appendChild(label);
+  moodWrap.appendChild(select);
+  moodWrap.appendChild(btn);
+  hud.appendChild(moodWrap);
+}
+
+addMoodSelectorHUD();
+
 // --- Display current YouTube Music track ---
 function getCurrentSongInfo() {
   if (!window.location.hostname.includes('music.youtube.com')) return null;
