@@ -479,7 +479,14 @@ function updateAudioStatus() {
     hud.style.borderRadius = '8px';
     document.body.appendChild(hud);
   }
-  hud.textContent = `Audio: ${status}`;
+
+  let statusEl = document.getElementById('uh-audio-status');
+  if (!statusEl) {
+    statusEl = document.createElement('div');
+    statusEl.id = 'uh-audio-status';
+    hud.appendChild(statusEl);
+  }
+  statusEl.textContent = `Audio: ${status}`;
 }
 
 document.addEventListener('keydown', (e) => {
@@ -501,3 +508,74 @@ const observeAudio = () => {
 };
 
 observeAudio();
+
+// --- Add a playlist dropdown to the HUD ---
+
+function getPlaylists() {
+  // Hardcode playlists for now; fetch dynamically later if needed
+  return [
+    { name: 'YouTube Music', value: 'ytmusic' },
+    { name: 'Morning Run Mix', value: 'morning_run' },
+    { name: 'Night City Walks', value: 'night_city' },
+    { name: 'Dreamcore Journeys', value: 'dreamcore' }
+  ];
+}
+
+function updatePlaylistHUD() {
+  // Find or create the main HUD container
+  let hud = document.getElementById('urban-hallucination-hud');
+  if (!hud) {
+    hud = document.createElement('div');
+    hud.id = 'urban-hallucination-hud';
+    hud.style.position = 'fixed';
+    hud.style.top = '20px';
+    hud.style.right = '20px';
+    hud.style.background = 'rgba(0,0,0,0.7)';
+    hud.style.color = '#fff';
+    hud.style.padding = '8px 18px';
+    hud.style.fontSize = '18px';
+    hud.style.zIndex = '999999';
+    hud.style.borderRadius = '8px';
+    document.body.appendChild(hud);
+  }
+
+  // Remove existing playlist selector, if present
+  let playlistWrap = document.getElementById('playlist-hud-wrap');
+  if (playlistWrap) playlistWrap.remove();
+
+  // Create wrapper for playlist dropdown
+  playlistWrap = document.createElement('div');
+  playlistWrap.id = 'playlist-hud-wrap';
+  playlistWrap.style.marginTop = '12px';
+
+  // Label
+  const label = document.createElement('label');
+  label.textContent = 'Playlist: ';
+  label.style.marginRight = '8px';
+
+  // Dropdown
+  const select = document.createElement('select');
+  select.id = 'playlist-dropdown';
+  select.style.fontSize = '16px';
+
+  // Populate options
+  getPlaylists().forEach(pl => {
+    const option = document.createElement('option');
+    option.value = pl.value;
+    option.textContent = pl.name;
+    select.appendChild(option);
+  });
+
+  // Optional: handle selection change
+  select.addEventListener('change', e => {
+    const value = e.target.value;
+    console.log('Selected playlist:', value);
+  });
+
+  playlistWrap.appendChild(label);
+  playlistWrap.appendChild(select);
+  hud.appendChild(playlistWrap);
+}
+
+// Call this after HUD is created
+updatePlaylistHUD();
