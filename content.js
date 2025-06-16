@@ -410,9 +410,33 @@ if (
   window.location.hostname === 'www.youtube.com' &&
   window.location.pathname === '/watch'
 ) {
-  const video = document.querySelector('video');
-  if (video) {
-    video.muted = true;
+  function muteVideo() {
+    const video = document.querySelector('video');
+    if (video && !video.muted) {
+      video.muted = true;
+      return true;
+    }
+    return false;
+  }
+
+  // Try immediately in case video is already there
+  if (!muteVideo()) {
+    // Try every 250ms for up to 5 seconds
+    let tries = 0;
+    const maxTries = 20;
+    const interval = setInterval(() => {
+      if (muteVideo() || ++tries >= maxTries) {
+        clearInterval(interval);
+      }
+    }, 250);
+
+    // Observe DOM changes if video appears later
+    const observer = new MutationObserver(() => {
+      if (muteVideo()) {
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
   }
 }
 
