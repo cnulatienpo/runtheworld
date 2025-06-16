@@ -94,22 +94,7 @@ function triggerZoneEffect() {
   const effect = pickEffectForZone(zone);
   if (!effect) return;
 
-  const overlay = document.createElement('div');
-  overlay.className = `uh-effect-zone-${zone}`;
-  Object.assign(overlay.style, getZoneStyles(zone), {
-    pointerEvents: 'none',
-    zIndex: 99999,
-    border: '3px solid #19e22e',
-    boxShadow: '0 0 16px 8px #19e22e77',
-    transition: 'opacity 0.6s'
-  });
-
-  overlay.innerHTML = `<span style="font-size:1.2em;color:#19e22e;background:rgba(24,24,24,0.6);padding:2px 8px;border-radius:8px;position:absolute;bottom:6px;right:12px;">${effect}</span>`;
-
-  document.body.appendChild(overlay);
-
-  setTimeout(() => { overlay.style.opacity = 0; }, 1300);
-  setTimeout(() => { overlay.remove(); }, 1800);
+  triggerNamedZoneEffect(effect, zone);
 
   document.getElementById('uh-hud-effect-zone')?.remove();
   const hudDiv = document.createElement('div');
@@ -118,6 +103,162 @@ function triggerZoneEffect() {
   hudDiv.style.fontWeight = 'bold';
   hudDiv.innerHTML = `Effect: <span style="color:#19e22e;">${effect}</span> | Zone: <span style="color:#1982e2;">${zone}</span>`;
   document.getElementById('uh-hud-panel')?.appendChild(hudDiv);
+}
+
+// Map effect names to implementation type
+const effectTypeMap = {
+  'soft-glow': 'css',
+  'flicker-lines': 'canvas',
+  'static-drift': 'canvas',
+  'scanline-burst': 'canvas',
+  'neon-bloom': 'css',
+  'electric-smear': 'css',
+  'hazy-fade': 'css',
+  'pastel-flow': 'css',
+  'echo-swirl': 'canvas',
+  'deep-mist': 'css',
+  'vivid-flash': 'css',
+  'liquid-shift': 'canvas',
+  'rust-grain': 'css',
+  'smoke-overlay': 'css',
+  'gear-spark': 'canvas',
+  'steam-bleed': 'css',
+  'metal-clang': 'canvas',
+  'factory-blast': 'canvas'
+};
+
+// Simple CSS filter presets per effect
+const effectFilters = {
+  'soft-glow': 'blur(3px) brightness(1.2)',
+  'neon-bloom': 'contrast(1.4) saturate(1.8)',
+  'electric-smear': 'hue-rotate(90deg) saturate(2.5)',
+  'hazy-fade': 'blur(6px) opacity(0.7)',
+  'pastel-flow': 'hue-rotate(180deg) saturate(1.3)',
+  'deep-mist': 'blur(8px)',
+  'vivid-flash': 'brightness(1.6) contrast(1.5)',
+  'rust-grain': 'sepia(0.8) contrast(1.1)',
+  'smoke-overlay': 'grayscale(0.4) blur(2px)',
+  'steam-bleed': 'brightness(1.3) blur(4px)'
+};
+
+// Canvas draw callbacks per effect
+const canvasDrawMap = {
+  'flicker-lines': drawScanlines,
+  'static-drift': drawScanlines,
+  'scanline-burst': drawScanlines,
+  'echo-swirl': drawEchoSwirl,
+  'liquid-shift': drawRipple,
+  'gear-spark': drawSpark,
+  'metal-clang': drawSpark,
+  'factory-blast': drawSpark
+};
+
+function triggerNamedZoneEffect(effect, zoneName) {
+  if (effectTypeMap[effect] === 'css') {
+    const filter = effectFilters[effect] || '';
+    applyCssZoneEffect(effect, zoneName, filter);
+  } else if (effectTypeMap[effect] === 'canvas') {
+    const drawFn = canvasDrawMap[effect];
+    if (typeof drawFn === 'function') {
+      applyCanvasZoneEffect(effect, zoneName, drawFn);
+    }
+  }
+}
+
+// Helper for CSS overlay
+function applyCssZoneEffect(effect, zoneName, filterString) {
+  const zone = screenZones[zoneName];
+  if (!zone) return;
+  const div = document.createElement('div');
+  Object.assign(div.style, zone, {
+    position: 'fixed',
+    zIndex: 10010,
+    pointerEvents: 'none',
+    filter: filterString,
+    clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)',
+    mixBlendMode: 'overlay'
+  });
+  div.className = 'uh-css-effect-overlay';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 1200);
+}
+
+// Helper for canvas based overlay
+function applyCanvasZoneEffect(effect, zoneName, drawEffectFn) {
+  const zone = screenZones[zoneName];
+  if (!zone) return;
+  let canvas = document.getElementById('uh-canvas');
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    canvas.id = 'uh-canvas';
+    Object.assign(canvas.style, {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      pointerEvents: 'none',
+      zIndex: 10000
+    });
+    document.body.appendChild(canvas);
+  }
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+
+  ctx.save();
+  ctx.beginPath();
+  let left = parseFloat(zone.left) / 100 * window.innerWidth || 0;
+  let top = parseFloat(zone.top) / 100 * window.innerHeight || 0;
+  if (zone.right) left = window.innerWidth - parseFloat(zone.right) / 100 * window.innerWidth - parseFloat(zone.width) / 100 * window.innerWidth;
+  if (zone.bottom) top = window.innerHeight - parseFloat(zone.bottom) / 100 * window.innerHeight - parseFloat(zone.height) / 100 * window.innerHeight;
+  let width = parseFloat(zone.width) / 100 * window.innerWidth;
+  let height = parseFloat(zone.height) / 100 * window.innerHeight;
+  ctx.rect(left, top, width, height);
+  ctx.clip();
+
+  drawEffectFn(ctx, left, top, width, height);
+
+  ctx.restore();
+}
+
+// Example canvas effect implementations
+function drawScanlines(ctx, x, y, w, h) {
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  for (let i = 0; i < h; i += 6) {
+    ctx.fillRect(x, y + i, w, 2);
+  }
+}
+
+function drawEchoSwirl(ctx, x, y, w, h) {
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  for (let r = 5; r < Math.min(w, h) / 2; r += 10) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+function drawRipple(ctx, x, y, w, h) {
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+  ctx.strokeStyle = 'rgba(0,150,255,0.3)';
+  for (let r = 0; r < Math.min(w, h) / 2; r += 8) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+function drawSpark(ctx, x, y, w, h) {
+  ctx.fillStyle = 'rgba(255,200,50,0.6)';
+  for (let i = 0; i < 20; i++) {
+    const sx = x + Math.random() * w;
+    const sy = y + Math.random() * h;
+    ctx.fillRect(sx, sy, 2, 2);
+  }
 }
 
 // --- Screen zone definitions ---
