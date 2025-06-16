@@ -5,6 +5,10 @@ window.zoneEffectMap = zoneEffectMap;
 let effectPacks = {};
 let currentEffectPack = localStorage.getItem('currentEffectPack') || 'cyberpunk';
 
+// Global toggle to enable/disable audio-driven triggers
+let audioTriggersEnabled = true;
+window.audioTriggersEnabled = audioTriggersEnabled;
+
 function updateEffectPackHUD(packName) {
   const label = document.getElementById('uh-hud-pack-label');
   if (label) label.textContent = packName;
@@ -755,12 +759,14 @@ function addJustLetMeRunToggle() {
 
   // Handler: enable/disable simple timed mode
   checkbox.addEventListener('change', (e) => {
+    audioTriggersEnabled = !e.target.checked; // Disable if checked
+    window.audioTriggersEnabled = audioTriggersEnabled;
     if (e.target.checked) {
-      console.log('Simple Timed Mode: ON');
-      // TODO: activate simple timed mode (disable hallucinations, etc.)
+      console.log("Simple Timed Mode: ON (Audio triggers paused)");
+      // Optionally, pause/stop any ongoing audio-triggered intervals or effects here
     } else {
-      console.log('Simple Timed Mode: OFF');
-      // TODO: deactivate simple timed mode
+      console.log("Simple Timed Mode: OFF (Audio triggers resumed)");
+      // Optionally, resume audio triggers
     }
   });
 
