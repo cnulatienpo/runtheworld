@@ -580,6 +580,41 @@ function updatePlaylistHUD() {
 // Call this after HUD is created
 updatePlaylistHUD();
 
+// --- Display current YouTube Music track ---
+function getCurrentSongInfo() {
+  if (!window.location.hostname.includes('music.youtube.com')) return null;
+
+  const titleElem = document.querySelector('.title.ytmusic-player-bar');
+  const artistElem = document.querySelector('.byline.ytmusic-player-bar');
+
+  if (titleElem && artistElem) {
+    const title = titleElem.textContent.trim();
+    const artist = artistElem.textContent.trim();
+    return { title, artist };
+  }
+  return null;
+}
+
+function updateSongHUD() {
+  const info = getCurrentSongInfo();
+  if (!info) return;
+
+  let hud = document.getElementById('urban-hallucination-hud');
+  if (!hud) return;
+
+  let songInfo = document.getElementById('hud-song-info');
+  if (!songInfo) {
+    songInfo = document.createElement('div');
+    songInfo.id = 'hud-song-info';
+    songInfo.style.marginTop = '8px';
+    hud.appendChild(songInfo);
+  }
+
+  songInfo.textContent = `Now Playing: ${info.title} — ${info.artist}`;
+}
+
+setInterval(updateSongHUD, 2000);
+
 // --- Natural hallucination spawn timer ---
 function getNaturalInterval() {
   // Slight bias to shorter intervals for natural feel
