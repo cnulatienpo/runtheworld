@@ -714,3 +714,59 @@ function updateSessionTimer() {
 // Start and update the timer every second
 setInterval(updateSessionTimer, 1000);
 updateSessionTimer(); // show immediately on load
+
+// --- "Just Let Me Run" Toggle ---
+function addJustLetMeRunToggle() {
+  let hud = document.getElementById('urban-hallucination-hud');
+  if (!hud) {
+    hud = document.createElement('div');
+    hud.id = 'urban-hallucination-hud';
+    hud.style.position = 'fixed';
+    hud.style.top = '20px';
+    hud.style.right = '20px';
+    hud.style.background = 'rgba(0,0,0,0.7)';
+    hud.style.color = '#fff';
+    hud.style.padding = '8px 18px';
+    hud.style.fontSize = '18px';
+    hud.style.zIndex = '999999';
+    hud.style.borderRadius = '8px';
+    document.body.appendChild(hud);
+  }
+
+  // Remove if it already exists
+  let runWrap = document.getElementById('run-toggle-wrap');
+  if (runWrap) runWrap.remove();
+
+  // Create wrapper
+  runWrap = document.createElement('div');
+  runWrap.id = 'run-toggle-wrap';
+  runWrap.style.marginTop = '12px';
+
+  // Checkbox
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.id = 'just-let-me-run';
+  checkbox.style.marginRight = '6px';
+
+  // Label
+  const label = document.createElement('label');
+  label.htmlFor = 'just-let-me-run';
+  label.textContent = 'Just Let Me Run (Simple Timed Mode)';
+
+  // Handler: enable/disable simple timed mode
+  checkbox.addEventListener('change', (e) => {
+    if (e.target.checked) {
+      console.log('Simple Timed Mode: ON');
+      // TODO: activate simple timed mode (disable hallucinations, etc.)
+    } else {
+      console.log('Simple Timed Mode: OFF');
+      // TODO: deactivate simple timed mode
+    }
+  });
+
+  runWrap.appendChild(checkbox);
+  runWrap.appendChild(label);
+  hud.appendChild(runWrap);
+}
+
+addJustLetMeRunToggle();
