@@ -579,3 +579,31 @@ function updatePlaylistHUD() {
 
 // Call this after HUD is created
 updatePlaylistHUD();
+
+// --- Default hallucination spawn timer ---
+function getRandomInterval(min, max) {
+  // min/max in milliseconds
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function spawnHallucination() {
+  // TODO: Replace with your hallucination-spawning logic
+  console.log(
+    'Spawn hallucination! (replace this with your effect/image)'
+  );
+  // e.g., addImageToCanvas(), triggerEffect(), etc.
+}
+
+function startSpawnTimer() {
+  function scheduleNext() {
+    const interval = getRandomInterval(10000, 20000); // 10–20 seconds
+    setTimeout(() => {
+      spawnHallucination();
+      scheduleNext();
+    }, interval);
+  }
+  scheduleNext();
+}
+
+// Start the timer when your content/overlay is ready
+startSpawnTimer();
