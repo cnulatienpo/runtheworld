@@ -457,3 +457,47 @@ if (
   }
 }
 
+
+// --- Manual Mute Toggle with HUD Status ---
+function updateAudioStatus() {
+  let status = 'Unknown';
+  const video = document.querySelector('video');
+  if (video) status = video.muted ? 'Muted' : 'Unmuted';
+
+  let hud = document.getElementById('urban-hallucination-hud');
+  if (!hud) {
+    hud = document.createElement('div');
+    hud.id = 'urban-hallucination-hud';
+    hud.style.position = 'fixed';
+    hud.style.top = '20px';
+    hud.style.right = '20px';
+    hud.style.background = 'rgba(0,0,0,0.7)';
+    hud.style.color = '#fff';
+    hud.style.padding = '8px 18px';
+    hud.style.fontSize = '18px';
+    hud.style.zIndex = '999999';
+    hud.style.borderRadius = '8px';
+    document.body.appendChild(hud);
+  }
+  hud.textContent = `Audio: ${status}`;
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key.toLowerCase() === 'm') {
+    const video = document.querySelector('video');
+    if (video) {
+      video.muted = !video.muted;
+      updateAudioStatus();
+    }
+  }
+});
+
+const observeAudio = () => {
+  const video = document.querySelector('video');
+  if (video) {
+    video.addEventListener('volumechange', updateAudioStatus);
+    updateAudioStatus();
+  }
+};
+
+observeAudio();
