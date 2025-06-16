@@ -54,11 +54,25 @@ packDiv.innerHTML = `
   <span id="uh-hud-pack-label" style="margin-left:10px; font-weight:bold;">${currentEffectPack}</span>
 `;
 
+// --- BPM & Energy HUD Elements ---
+const bpmDisplay = document.createElement('div');
+
+function getEnergyLevel(bpm) {
+  if (bpm < 100) return 'Low';
+  if (bpm <= 130) return 'Medium';
+  return 'High';
+}
+
+function getSimulatedBPM() {
+  return Math.floor(Math.random() * (160 - 80 + 1)) + 80;
+}
+
 // Startup when HUD exists
 window.addEventListener('DOMContentLoaded', async () => {
   const panel = document.getElementById('uh-hud-panel');
   if (panel) {
     panel.appendChild(packDiv);
+    panel.appendChild(bpmDisplay);
     await initializeEffectPacks();
     document.getElementById('uh-hud-pack').onchange = async e => {
       await loadEffectPack(e.target.value);
@@ -379,3 +393,14 @@ function connectWebSocket() {
 }
 
 connectWebSocket();
+
+// Initial BPM display and periodic updates
+function updateBPM() {
+  const bpm = getSimulatedBPM();
+  const energy = getEnergyLevel(bpm);
+  bpmDisplay.innerText = `BPM: ${bpm} | Energy: ${energy}`;
+  console.log(`[RunTheWorld] BPM: ${bpm}, Energy: ${energy}`);
+}
+
+updateBPM();
+setInterval(updateBPM, 4000);
