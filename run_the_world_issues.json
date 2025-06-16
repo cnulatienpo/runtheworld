@@ -1,0 +1,144 @@
+[
+  {
+    "title": "Simple Timer in Overlay",
+    "body": "Display a clean session timer in the overlay.\n\n- Show elapsed time since session start\n- Position it in corner of video\n- No logic or sync, just display time like `12:31`\n\nLabels: `hud`, `core`, `priority:low`\nMilestone: 1",
+    "labels": [
+      "`hud`",
+      "`core`",
+      "`priority:low`\nMilestone: 1"
+    ],
+    "milestone": 1
+  },
+  {
+    "title": "YouTube Video Loader + Manual Playlist Picker",
+    "body": "Let the user load YouTube video URLs into the extension.\n\n- Paste YouTube video or playlist URL\n- Optional dropdown to pick mood/location\n- Display confirmation: `Run in Tokyo at night`\n\nLabels: `music`, `playlist`, `priority:medium`\nMilestone: 2",
+    "labels": [
+      "`music`",
+      "`playlist`",
+      "`priority:medium`\nMilestone: 2"
+    ],
+    "milestone": 2
+  },
+  {
+    "title": "Hallucination Overlay Mode (CSS/WebGL filters)",
+    "body": "Add a simple canvas over the YouTube video.\n\n- Apply effects: blur, hue shift, non-blinking glitch, heat shimmer\n- Filters should be subtle and not obstruct viewing\n\nLabels: `overlay`, `effects`, `priority:high`\nMilestone: 3",
+    "labels": [
+      "`overlay`",
+      "`effects`",
+      "`priority:high`\nMilestone: 3"
+    ],
+    "milestone": 3
+  },
+  {
+    "title": "Static Travel Route Tracker (Pre-set Distance)",
+    "body": "User picks a static travel route (e.g., Tokyo \u2192 Berlin \u2192 Chicago).\n\n- Total miles hardcoded (e.g., 9,452 mi)\n- Each session logs distance run based on input\n- Display: `You\u2019ve run 32.8 miles on your world tour`\n\nLabels: `travel`, `distance`, `priority:medium`\nMilestone: 4",
+    "labels": [
+      "`travel`",
+      "`distance`",
+      "`priority:medium`\nMilestone: 4"
+    ],
+    "milestone": 4
+  },
+  {
+    "title": "Post-Run Travel Log (Simple Text Entry)",
+    "body": "After each run, user adds a note or auto-text is generated.\n\n- Store locally as JSON session history\n- Example: `Ran through Berlin\u2014felt strong. Fog everywhere.`\n\nLabels: `log`, `session`, `priority:medium`\nMilestone: 5",
+    "labels": [
+      "`log`",
+      "`session`",
+      "`priority:medium`\nMilestone: 5"
+    ],
+    "milestone": 5
+  },
+  {
+    "title": "Music BPM Selector (User Toggles or Vibe-Based)",
+    "body": "Let user pick a BPM range or mood.\n\n- Load YouTube/Spotify playlist matching that energy\n- Example: `User chooses 'High energy' and gets 160 BPM tracks`\n\nLabels: `music`, `bpm`, `priority:medium`\nMilestone: 6",
+    "labels": [
+      "`music`",
+      "`bpm`",
+      "`priority:medium`\nMilestone: 6"
+    ],
+    "milestone": 6
+  },
+  {
+    "title": "Auto-Switch YouTube Videos Mid-Run",
+    "body": "Change videos based on time or input.\n\n- Switch to next city every X minutes\n- Optional key to skip\n- Example: `You just left Istanbul, now entering Zurich`\n\nLabels: `playlist`, `automation`, `priority:medium`\nMilestone: 7",
+    "labels": [
+      "`playlist`",
+      "`automation`",
+      "`priority:medium`\nMilestone: 7"
+    ],
+    "milestone": 7
+  },
+  {
+    "title": "Basic Wearable Listener \u2192 Extension Bridge",
+    "body": "Use fake step server or WebSocket listener for pace.\n\n- Input includes speed, steps, BPM\n- Used internally (not displayed yet)\n- Example: `You're running at 5.2 mph`\n\nLabels: `bridge`, `wearable`, `priority:medium`\nMilestone: 8",
+    "labels": [
+      "`bridge`",
+      "`wearable`",
+      "`priority:medium`\nMilestone: 8"
+    ],
+    "milestone": 8
+  },
+  {
+    "title": "Miles Traveled Based on Real-Time Pace",
+    "body": "Track actual distance during session.\n\n- Calculate miles from current pace/speed\n- Subtract from total travel route\n- Display: `You're now 237 miles into your 9,452 mile journey`\n\nLabels: `distance`, `logic`, `priority:high`\nMilestone: 9",
+    "labels": [
+      "`distance`",
+      "`logic`",
+      "`priority:high`\nMilestone: 9"
+    ],
+    "milestone": 9
+  },
+  {
+    "title": "\u201cSurprise Me\u201d Daily Travel Mode Selector",
+    "body": "Pick 2\u20133 cities/videos automatically for today\u2019s session.\n\n- Weighted by vibe, length, and variety\n- Example: `Today: Seoul \u2192 Coastal France \u2192 Foggy London`\n\nLabels: `travel`, `mood`, `priority:high`\nMilestone: 10",
+    "labels": [
+      "`travel`",
+      "`mood`",
+      "`priority:high`\nMilestone: 10"
+    ],
+    "milestone": 10
+  },
+  {
+    "title": "Music Tag Cache",
+    "body": "Store tagged songs in localStorage or JSON.\n\n- Format: `{ 'Artist - Title': { intensity: 8, position: 'peak' } }`\n- Auto-load tags when song repeats\n- Overwrite when user re-tags\n\nLabels: `music`, `tags`, `priority:medium`\nMilestone: 11",
+    "labels": [
+      "`music`",
+      "`tags`",
+      "`priority:medium`\nMilestone: 11"
+    ],
+    "milestone": 11
+  },
+  {
+    "title": "Real Shuffle",
+    "body": "Shuffle music playlist using real logic (Fisher-Yates).\n\n- Grab all items from playlist\n- Shuffle locally\n- Play in randomized order\n\nLabels: `music`, `shuffle`, `priority:medium`\nMilestone: 12",
+    "labels": [
+      "`music`",
+      "`shuffle`",
+      "`priority:medium`\nMilestone: 12"
+    ],
+    "milestone": 12
+  },
+  {
+    "title": "Use Tags to Pace Hallucinations",
+    "body": "Match tag intensity/position to pacing logic.\n\n- Tag: `build-up`, `peak`, `cooldown`\n- Influence spawn speed and intensity\n\nLabels: `logic`, `tags`, `overlay`, `priority:high`\nMilestone: 13",
+    "labels": [
+      "`logic`",
+      "`tags`",
+      "`overlay`",
+      "`priority:high`\nMilestone: 13"
+    ],
+    "milestone": 13
+  },
+  {
+    "title": "Live Audio Analysis + Effect Sync (Optional)",
+    "body": "Analyze live system or tab audio to trigger effects.\n\n- Use volume spikes or beat detection\n- Trigger hallucinations during loud moments\n\nLabels: `audio`, `sync`, `stretch-goal`, `priority:high`\nMilestone: 14",
+    "labels": [
+      "`audio`",
+      "`sync`",
+      "`stretch-goal`",
+      "`priority:high`\nMilestone: 14"
+    ],
+    "milestone": 14
+  }
+]
