@@ -801,8 +801,26 @@ function addTagButtons(tags, onTagClick) {
   tagWrap.id = 'hud-tag-buttons';
   tagWrap.style.marginTop = '12px';
 
+  // Create/Find tag status display
+  let tagStatus = document.getElementById('hud-tag-status');
+  if (!tagStatus) {
+    tagStatus = document.createElement('div');
+    tagStatus.id = 'hud-tag-status';
+    tagStatus.style.marginTop = "6px";
+    tagStatus.style.fontSize = "16px";
+    hud.appendChild(tagStatus);
+  }
+
   // Get saved tag from localStorage
   const savedTag = localStorage.getItem('selectedTag');
+
+  function updateTagStatus(tag) {
+    tagStatus.textContent = tag
+      ? `Selected tag: ${tag}`
+      : "No tag selected";
+    // Also confirm in console
+    console.log("Selected tag:", tag);
+  }
 
   tags.forEach(tag => {
     const btn = document.createElement('button');
@@ -823,13 +841,17 @@ function addTagButtons(tags, onTagClick) {
       Array.from(tagWrap.children).forEach(b =>
         b.style.background = (b.textContent === tag) ? "#29a19c" : "#353535"
       );
-
+      
+      updateTagStatus(tag);
       onTagClick(tag);
     });
     tagWrap.appendChild(btn);
   });
 
   hud.appendChild(tagWrap);
+
+  // On load, update tag status display
+  updateTagStatus(savedTag);
 }
 
 addTagButtons(
