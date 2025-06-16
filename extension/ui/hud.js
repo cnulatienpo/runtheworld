@@ -19,6 +19,31 @@ let effectCount = Number(localStorage.getItem('effectCount') || 0);
 let currentEffectPack = localStorage.getItem('currentEffectPack') || '';
 window.currentEffectPack = currentEffectPack;
 
+// ---- Hallucination Pack Setup ----
+const packMap = {
+  Default: {
+    low: ["soft", "fade"],
+    medium: ["pulse", "float"],
+    high: ["flash", "strobe"],
+  },
+  Cyberpunk: {
+    low: ["glitch", "pulse"],
+    medium: ["static-drift", "scanline"],
+    high: ["neon-bloom", "electric-smear"],
+  },
+  Dreamcore: {
+    low: ["haze", "pastel-float"],
+    medium: ["echo-glow", "drift-wave"],
+    high: ["vapor-burst", "rainbow-veil"],
+  },
+};
+
+const packNames = Object.keys(packMap);
+let currentPack = localStorage.getItem('currentPack') || packNames[0];
+let moodEffectMap = packMap[currentPack];
+window.currentPack = currentPack;
+window.moodEffectMap = moodEffectMap;
+
 // Restore or initialize session start time
 let sessionStartTime = Number(localStorage.getItem('sessionStartTime') || Date.now());
 localStorage.setItem('sessionStartTime', sessionStartTime);
@@ -101,6 +126,35 @@ moodDiv.innerHTML = `
 `;
 
 hudPanel.appendChild(moodDiv);
+
+// ---- Hallucination Pack dropdown ----
+const packDiv = document.createElement('div');
+packDiv.id = 'uh-hud-pack-switcher';
+packDiv.style.margin = '12px 0';
+packDiv.innerHTML = `
+  <label for="uh-hud-pack-select" style="font-weight:bold; margin-right:8px;">Hallucination Pack:</label>
+  <select id="uh-hud-pack-select"></select>
+  <span id="uh-hud-pack-label" style="margin-left:10px; font-weight:bold;">Pack: ${currentPack}</span>
+`;
+hudPanel.appendChild(packDiv);
+
+const packSelect = document.getElementById('uh-hud-pack-select');
+packNames.forEach(name => {
+  const opt = document.createElement('option');
+  opt.value = name;
+  opt.textContent = name;
+  packSelect.appendChild(opt);
+});
+packSelect.value = currentPack;
+packSelect.onchange = e => {
+  currentPack = e.target.value;
+  moodEffectMap = packMap[currentPack];
+  window.currentPack = currentPack;
+  window.moodEffectMap = moodEffectMap;
+  localStorage.setItem('currentPack', currentPack);
+  document.getElementById('uh-hud-pack-label').textContent = 'Pack: ' + currentPack;
+};
+
 
 // Set initial mood and handler
 const moodSelect = document.getElementById('uh-hud-mood-select');
@@ -327,6 +381,15 @@ function triggerEffect(...args) {
   }
 }
 
+function triggerEffectForMood(mood) {
+  const options = moodEffectMap[mood] || [];
+  const effect = options[Math.floor(Math.random() * options.length)];
+  if (effect) {
+    // Placeholder for actual effect triggering logic
+    console.log('Triggering effect:', effect);
+  }
+}
+
 function resetEffectCount() {
   effectCount = 0;
   updateEffectCountHUD(effectCount);
@@ -426,6 +489,7 @@ updateStepCountHUD(stepCount);
 
 // Export triggerEffect and reset function to global scope if needed
 window.triggerEffect = triggerEffect;
+window.triggerEffectForMood = triggerEffectForMood;
 window.resetEffectCount = resetEffectCount;
 window.resetSessionStartTime = resetSessionStartTime;
 window.resetSession = resetSession;
