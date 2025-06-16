@@ -7,7 +7,9 @@ GITHUB_TOKEN = "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"  # <-- Paste your toke
 REPO = "cnulatienpo/runtheworld"
 
 # Tasklist file location
-TASKLIST_FILE = ".github/workflows/urban-hallucination-overlay-tasklist (1).md"
+# The task list markdown file lives in the repository root, so reference it
+# directly instead of under .github/workflows.
+TASKLIST_FILE = "urban-hallucination-overlay-tasklist (1).md"
 
 # Extract tasks from the file
 def parse_tasks(file_path):
