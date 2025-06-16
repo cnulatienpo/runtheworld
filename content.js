@@ -811,6 +811,51 @@ function addTagButtons(tags, onTagClick) {
     hud.appendChild(tagStatus);
   }
 
+  // Copy selected tag to clipboard
+  const copyBtn = document.createElement('button');
+  copyBtn.textContent = 'Copy Tag';
+  copyBtn.style.marginLeft = '12px';
+  copyBtn.style.fontSize = '14px';
+  copyBtn.style.padding = '2px 10px';
+  copyBtn.style.borderRadius = '6px';
+  copyBtn.style.border = 'none';
+  copyBtn.style.background = '#2e2e2e';
+  copyBtn.style.color = '#fff';
+  copyBtn.style.cursor = 'pointer';
+  copyBtn.addEventListener('click', () => {
+    const tag = localStorage.getItem('selectedTag');
+    if (tag) {
+      navigator.clipboard.writeText(tag);
+      alert(`Tag "${tag}" copied to clipboard!`);
+    }
+  });
+  tagStatus.appendChild(copyBtn);
+
+  // Export selected tag as a file
+  const exportBtn = document.createElement('button');
+  exportBtn.textContent = 'Export Tag';
+  exportBtn.style.marginLeft = '8px';
+  exportBtn.style.fontSize = '14px';
+  exportBtn.style.padding = '2px 10px';
+  exportBtn.style.borderRadius = '6px';
+  exportBtn.style.border = 'none';
+  exportBtn.style.background = '#2e2e2e';
+  exportBtn.style.color = '#fff';
+  exportBtn.style.cursor = 'pointer';
+  exportBtn.addEventListener('click', () => {
+    const tag = localStorage.getItem('selectedTag');
+    if (tag) {
+      const blob = new Blob([tag], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'selected-tag.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  });
+  tagStatus.appendChild(exportBtn);
+
   // Get saved tag from localStorage
   const savedTag = localStorage.getItem('selectedTag');
 
@@ -849,6 +894,16 @@ function addTagButtons(tags, onTagClick) {
   });
 
   hud.appendChild(tagWrap);
+
+  // Keyboard shortcuts 1-9 select corresponding tag
+  document.addEventListener('keydown', (e) => {
+    if (!document.getElementById('urban-hallucination-hud')) return;
+    const num = parseInt(e.key);
+    if (num >= 1 && num <= tags.length) {
+      const tagBtn = Array.from(tagWrap.children)[num - 1];
+      if (tagBtn) tagBtn.click();
+    }
+  });
 
   // On load, update tag status display
   updateTagStatus(savedTag);
