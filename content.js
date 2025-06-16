@@ -404,3 +404,15 @@ function updateBPM() {
 
 updateBPM();
 setInterval(updateBPM, 4000);
+
+// Auto-mute YouTube videos on watch pages
+if (
+  window.location.hostname === 'www.youtube.com' &&
+  window.location.pathname === '/watch'
+) {
+  const video = document.querySelector('video');
+  if (video) {
+    video.muted = true;
+  }
+}
+
