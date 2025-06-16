@@ -373,9 +373,9 @@ startEffectInterval();
 
 function triggerEffect(...args) {
   if (hallucinationsEnabled) {
-    // ... existing effect code here ...
-    // Mood can influence intensity, visuals, etc.
-    // sessionMood will be 'low', 'medium', or 'high'
+    if (typeof window.triggerZoneEffect === 'function') {
+      window.triggerZoneEffect();
+    }
     effectCount++;
     updateEffectCountHUD(effectCount);
   }

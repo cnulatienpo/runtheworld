@@ -6,7 +6,7 @@
     "high": ["metal-clang", "factory-blast"]
   },
   "zones": {
-    "bottom-left": "rust-grain",
-    "center": "factory-blast"
+    "bottom-left": ["rust-grain"],
+    "center": ["factory-blast"]
   }
 }

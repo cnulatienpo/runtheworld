@@ -6,8 +6,8 @@
     "high": ["neon-bloom", "electric-smear"]
   },
   "zones": {
-    "top-left": "scanline-burst",
-    "center": "neon-bloom",
-    "bottom-right": "electric-smear"
+    "top-left": ["scanline-burst"],
+    "center": ["neon-bloom"],
+    "bottom-right": ["electric-smear"]
   }
 }

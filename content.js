@@ -1,6 +1,7 @@
 // Manage effect packs loaded from JSON files
 let moodEffectMap = {};
 let zoneEffectMap = {};
+window.zoneEffectMap = zoneEffectMap;
 let effectPacks = {};
 let currentEffectPack = localStorage.getItem('currentEffectPack') || 'cyberpunk';
 
@@ -21,6 +22,7 @@ async function loadEffectPack(packName) {
   effectPacks[packName] = pack;
   moodEffectMap = pack.moods || {};
   zoneEffectMap = pack.zones || {};
+  window.zoneEffectMap = zoneEffectMap;
 
   updateEffectPackHUD(pack.name);
 
@@ -71,6 +73,51 @@ function getEffectsForMood(mood) {
 
 function getZoneEffect(zone) {
   return zoneEffectMap[zone];
+}
+
+// --- Zone-based effect selection helpers ---
+function pickZone() {
+  const names = Object.keys(zoneEffectMap);
+  if (!names.length) return null;
+  return names[Math.floor(Math.random() * names.length)];
+}
+
+function pickEffectForZone(zone) {
+  const effects = zoneEffectMap[zone] || [];
+  if (!effects.length) return null;
+  return effects[Math.floor(Math.random() * effects.length)];
+}
+
+function triggerZoneEffect() {
+  const zone = pickZone();
+  if (!zone) return;
+  const effect = pickEffectForZone(zone);
+  if (!effect) return;
+
+  const overlay = document.createElement('div');
+  overlay.className = `uh-effect-zone-${zone}`;
+  Object.assign(overlay.style, getZoneStyles(zone), {
+    pointerEvents: 'none',
+    zIndex: 99999,
+    border: '3px solid #19e22e',
+    boxShadow: '0 0 16px 8px #19e22e77',
+    transition: 'opacity 0.6s'
+  });
+
+  overlay.innerHTML = `<span style="font-size:1.2em;color:#19e22e;background:rgba(24,24,24,0.6);padding:2px 8px;border-radius:8px;position:absolute;bottom:6px;right:12px;">${effect}</span>`;
+
+  document.body.appendChild(overlay);
+
+  setTimeout(() => { overlay.style.opacity = 0; }, 1300);
+  setTimeout(() => { overlay.remove(); }, 1800);
+
+  document.getElementById('uh-hud-effect-zone')?.remove();
+  const hudDiv = document.createElement('div');
+  hudDiv.id = 'uh-hud-effect-zone';
+  hudDiv.style.margin = '10px 0';
+  hudDiv.style.fontWeight = 'bold';
+  hudDiv.innerHTML = `Effect: <span style="color:#19e22e;">${effect}</span> | Zone: <span style="color:#1982e2;">${zone}</span>`;
+  document.getElementById('uh-hud-panel')?.appendChild(hudDiv);
 }
 
 // --- Screen zone definitions ---
@@ -130,3 +177,4 @@ window.getZoneStyles = getZoneStyles;
 window.showDebugZones = showDebugZones;
 window.removeDebugZones = removeDebugZones;
 window.createZoneOverlay = createZoneOverlay;
+window.triggerZoneEffect = triggerZoneEffect;
